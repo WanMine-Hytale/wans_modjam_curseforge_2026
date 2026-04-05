@@ -1,0 +1,89 @@
+{
+  "Model": "Scarak_Seeker_Spitball",
+  "Physics": {
+    "Type": "Standard",
+    "Gravity": 3,
+    "TerminalVelocityAir": 150,
+    "TerminalVelocityWater": 15,
+    "RotationMode": "Velocity",
+    "Bounciness": 0.0,
+    "SticksVertically": false
+  },
+  "LaunchForce": 120,
+  "SpawnOffset": {
+    "X": 0,
+    "Y": 0,
+    "Z": 0.5
+  },
+  "Interactions": {
+    "ProjectileHit": {
+      "Cooldown": {
+        "Cooldown": 0
+      },
+      "Interactions": [
+        {
+          "Type": "DamageEntity",
+          "Entity": "Target",
+          "DamageCalculator": {
+            "Type": "Absolute",
+            "BaseDamage": {
+              "Fire": 15
+            },
+            "RandomPercentageModifier": 0.1
+          },
+          "DamageEffects": {
+            "Knockback": {
+              "Force": 0.5
+            },
+            "WorldSoundEventId": "SFX_Unarmed_Impact",
+            "WorldParticles": [
+              {
+                "SystemId": "Impact_Fire"
+              }
+            ]
+          },
+          "Next": {
+            "Type": "ApplyEffect",
+            "Entity": "Target",
+            "EffectId": "Burn_T1"
+          }
+        },
+        {
+          "Type": "RemoveEntity",
+          "Entity": "User"
+        }
+      ]
+    },
+    "ProjectileMiss": {
+      "Cooldown": {
+        "Cooldown": 0
+      },
+      "Interactions": [
+        {
+          "Type": "Simple",
+          "RunTime": 0,
+          "Effects": {
+            "WorldSoundEventId": "SFX_Unarmed_Impact",
+            "WorldParticles": [
+              {
+                "SystemId": "Impact_Fire"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "PlaceFluid",
+          "FluidToPlace": "Fire",
+          "RemoveItemInHand": false,
+          "Effects": {
+            "WorldSoundEventId": "SFX_Flame_Build"
+          }
+        },
+        {
+          "Type": "RemoveEntity",
+          "Entity": "User"
+        }
+      ]
+    }
+  }
+}
