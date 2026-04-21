@@ -48,8 +48,7 @@ public class PlayerRangeTickSystem extends EntityTickingSystem<EntityStore> {
                      @Nonnull Store<EntityStore> store,
                      @Nonnull CommandBuffer<EntityStore> commandBuffer) {
 
-        // Se Vorthrax non è registrato/in vita, non fare nulla
-        if (!bossBarManager.isVorthraxAlive()) return;
+        if (!bossBarManager.isVorthraxAlive()) {}
 
         TransformComponent playerTransform = (TransformComponent) archetypeChunk.getComponent(
                 index, TransformComponent.getComponentType());

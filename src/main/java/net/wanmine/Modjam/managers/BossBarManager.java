@@ -15,10 +15,8 @@ import java.util.Map;
 
 public class BossBarManager {
 
-    public static final double BOSS_RANGE = 100.0;
+    public static final double BOSS_RANGE = 400.0;
     public static final String BOSS_NAME  = "Vorthrax";
-
-    // ── Stato Vorthrax ────────────────────────────────────────────────────────
 
     @Nullable private Ref<EntityStore> vorthraxRef;
     @Nullable private Vector3d         vorthraxPosition;
@@ -80,8 +78,6 @@ public class BossBarManager {
         }
     }
 
-    // ── Aggiornamento HP (VorthraxDamageSystem) ───────────────────────────────
-
     public void onVorthraxDamaged(@Nonnull Ref<EntityStore> vorthraxEntityRef,
                                   float healthPercent,
                                   @Nonnull Store<EntityStore> store) {
@@ -98,15 +94,10 @@ public class BossBarManager {
         }
     }
 
-    public void onVorthraxDied() {
-        for (HudEntry entry : activeHuds.values()) {
-            entry.hud.hide();
-            entry.playerComponent.getHudManager().resetHud(entry.playerRefComponent);
-        }
-        activeHuds.clear();
-        vorthraxRef       = null;
-        vorthraxPosition  = null;
-        lastHealthPercent = 1.0f;
+    public void onVorthraxDeath(Ref<EntityStore> ref, Store<EntityStore> store) {}
+
+    public boolean isVorthraxValid(Store<EntityStore> store) {
+        return isVorthraxAlive();
     }
 
     public void clearAll() {

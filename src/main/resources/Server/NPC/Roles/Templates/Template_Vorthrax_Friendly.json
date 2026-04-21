@@ -1,7 +1,6 @@
 {
   "Type": "Abstract",
   "Debug": "DisplayState",
-  "DefaultNPCAttitude": "Hostile",
   "StartState": "Idle",
   "Parameters": {
     "Appearance": {
@@ -13,7 +12,7 @@
       "Description": "Drop Items"
     },
     "FlockArray": {
-      "Value": [ "Vorthrax" ],
+      "Value": [ "Vorthrax_Friendly" ],
       "Description": "Array containing NPCs for this flock type"
     },
     "WanderRadius": {
@@ -45,12 +44,12 @@
       "Description": "Overrides the memory name if set"
     },
     "NameTranslationKey": {
-      "Value": "Vorthrax",
+      "Value": "Vorthrax_Friendly",
       "Description": "Translation key for NPC name display"
     },
     "AggroRange": {
       "Value": 80,
-      "Description": "Range at which the NPC spots and attacks the player"
+      "Description": "Range at which the NPC spots and attacks other NPCs"
     },
     "Attack": {
       "Value": "Root_NPC_Vorthrax_Attack",
@@ -241,19 +240,7 @@
                   ]
                 },
                 {
-                  "Sensor": {
-                    "Type": "Damage",
-                    "Combat": true,
-                    "TargetSlot": "LockedTarget"
-                  },
-                  "Actions": [
-                    {
-                      "Type": "State",
-                      "State": "Combat"
-                    }
-                  ]
-                },
-                {
+                  "$Comment": "Panico se colpito da danno ambientale (non da combattimento)",
                   "Sensor": {
                     "Type": "Damage",
                     "Combat": false,
@@ -267,16 +254,11 @@
                   ]
                 },
                 {
-                  "$Comment": "Aggro: spot player in range with line of sight",
+                  "$Comment": "Entra in Combat se colpito da un NPC/entity",
                   "Sensor": {
-                    "Type": "Player",
-                    "Range": { "Compute": "AggroRange" },
-                    "LockOnTarget": true,
-                    "Filters": [
-                      {
-                        "Type": "LineOfSight"
-                      }
-                    ]
+                    "Type": "Damage",
+                    "Combat": true,
+                    "TargetSlot": "LockedTarget"
                   },
                   "Actions": [
                     {
@@ -450,12 +432,13 @@
               ]
             },
             {
-              "$Comment": "Player out of range — chase for 5 seconds, then give up",
+              "$Comment": "Target fuori range — insegui 5 secondi poi abbandona",
               "Continue": true,
               "Sensor": {
                 "Type": "Not",
                 "Sensor": {
-                  "Type": "Player",
+                  "Type": "Target",
+                  "TargetSlot": "LockedTarget",
                   "Range": { "Compute": "AggroRange" }
                 }
               },
@@ -492,15 +475,15 @@
               ]
             },
             {
-              "$Comment": "Ranged attack when player is at mid range and not too close",
+              "$Comment": "Ranged attack quando il target è a media distanza e non troppo vicino",
               "Continue": true,
               "Sensor": {
                 "Type": "And",
                 "Sensors": [
                   {
-                    "Type": "Player",
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
                     "Range": { "Compute": "RangedAttackDistance" },
-                    "LockOnTarget": true,
                     "Filters": [
                       {
                         "Type": "LineOfSight"
@@ -510,8 +493,9 @@
                   {
                     "Type": "Not",
                     "Sensor": {
-                      "Type": "Player",
-                      "Range": 40
+                      "Type": "Target",
+                      "TargetSlot": "LockedTarget",
+                      "Range": 25
                     }
                   }
                 ]
@@ -520,6 +504,7 @@
                 {
                   "Type": "Attack",
                   "Attack": { "Compute": "RangedAttack" },
+                  "BallisticMode": "Short",
                   "AimingTimeRange": [ 1, 2 ],
                   "AttackPauseRange": [ 2, 4 ]
                 }
@@ -532,7 +517,7 @@
               }
             },
             {
-              "$Comment": "Pattern A — Melee normal speed (50%): attacca senza cambiare stato",
+              "$Comment": "Pattern A — Melee (50%): Seek + Attack + Strafe",
               "Continue": true,
               "Sensor": {
                 "Type": "Random",
@@ -541,11 +526,11 @@
               },
               "Instructions": [
                 {
-                  "$Comment": "In range — attacca, niente cambio stato",
+                  "$Comment": "In range — attacca e vola attraverso",
                   "Sensor": {
-                    "Type": "Player",
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
                     "Range": 25,
-                    "LockOnTarget": true,
                     "Filters": [
                       {
                         "Type": "LineOfSight"
@@ -555,8 +540,8 @@
                   "BodyMotion": {
                     "Type": "Seek",
                     "SlowDownDistance": 30,
-                    "StopDistance": 15,
-                    "RelativeSpeed": 2
+                    "StopDistance": 20,
+                    "RelativeSpeed": 1
                   },
                   "Actions": [
                     {
@@ -573,9 +558,9 @@
                 {
                   "$Comment": "Non ancora in range — avvicinati",
                   "Sensor": {
-                    "Type": "Player",
-                    "Range": { "Compute": "AggroRange" },
-                    "LockOnTarget": true
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": { "Compute": "AggroRange" }
                   },
                   "BodyMotion": {
                     "Type": "Seek",
@@ -587,7 +572,62 @@
               ]
             },
             {
-              "$Comment": "Pattern C — fallback: avvicinati lentamente, mantiene LockOnTarget vivo",
+              "$Comment": "Pattern B — Fast charge (25%): stesso ma più veloce",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Random",
+                "TrueDurationRange": [ 3, 6 ],
+                "FalseDurationRange": [ 0.1, 0.1 ]
+              },
+              "Instructions": [
+                {
+                  "$Comment": "In range — carica veloce, attacca e vola attraverso",
+                  "Sensor": {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": 25,
+                    "Filters": [
+                      {
+                        "Type": "LineOfSight"
+                      }
+                    ]
+                  },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": 30,
+                    "StopDistance": 20,
+                    "RelativeSpeed": 1.5
+                  },
+                  "Actions": [
+                    {
+                      "Type": "Attack",
+                      "Attack": { "Compute": "Attack" },
+                      "AttackType": "Primary"
+                    },
+                    {
+                      "Type": "State",
+                      "State": "Strafe"
+                    }
+                  ]
+                },
+                {
+                  "$Comment": "Non ancora in range — carica veloce",
+                  "Sensor": {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": { "Compute": "AggroRange" }
+                  },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": 30,
+                    "StopDistance": 20,
+                    "RelativeSpeed": 1.5
+                  }
+                }
+              ]
+            },
+            {
+              "$Comment": "Pattern C — Ranged fallback (25%): avvicinati lentamente",
               "Continue": true,
               "Sensor": {
                 "Type": "Any"
@@ -595,9 +635,9 @@
               "Instructions": [
                 {
                   "Sensor": {
-                    "Type": "Player",
-                    "Range": { "Compute": "AggroRange" },
-                    "LockOnTarget": true
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": { "Compute": "AggroRange" }
                   },
                   "BodyMotion": {
                     "Type": "Seek",
@@ -611,27 +651,13 @@
           ]
         },
         {
-          "$Comment": "Strafe — vola dritto veloce e sale in quota, poi torna in Combat",
+          "$Comment": "Strafe — continua dritto nella direzione attuale, poi vai in Retreat",
           "Sensor": {
             "Type": "State",
             "State": "Strafe"
           },
           "Instructions": [
             {
-              "$Comment": "Forza la salita in quota ogni tick",
-              "Continue": true,
-              "Sensor": {
-                "Type": "Any"
-              },
-              "Actions": [
-                {
-                  "Type": "OverrideAltitude",
-                  "DesiredAltitudeRange": [ 80, 100 ]
-                }
-              ]
-            },
-            {
-              "$Comment": "Vola dritto nella direzione corrente",
               "Continue": true,
               "Sensor": {
                 "Type": "Any"
@@ -644,11 +670,66 @@
               }
             },
             {
-              "$Comment": "Timeout corto: 0.8-1.2 secondi, poi torna in Combat",
+              "Reference": "Component_Instruction_State_Timeout",
+              "Modify": {
+                "_ExportStates": [ "Retreat" ],
+                "Delay": [ 0.5, 1 ]
+              }
+            }
+          ]
+        },
+        {
+          "$Comment": "Retreat — sale in quota e poi torna in Combat",
+          "Sensor": {
+            "Type": "State",
+            "State": "Retreat"
+          },
+          "Instructions": [
+            {
+              "$Comment": "Override altitudine ogni tick",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Any"
+              },
+              "Actions": [
+                {
+                  "Type": "OverrideAltitude",
+                  "DesiredAltitudeRange": [ 80, 100 ]
+                }
+              ]
+            },
+            {
+              "$Comment": "Torna in Combat dopo aver preso quota",
               "Reference": "Component_Instruction_State_Timeout",
               "Modify": {
                 "_ExportStates": [ "Combat" ],
-                "Delay": [ 0.8, 1.2 ]
+                "Delay": [ 2, 4 ]
+              }
+            },
+            {
+              "$Comment": "Fuggi dal target mentre sali",
+              "Sensor": {
+                "Type": "Target",
+                "TargetSlot": "LockedTarget",
+                "Range": { "Compute": "AggroRange" }
+              },
+              "BodyMotion": {
+                "Type": "Flee",
+                "SlowDownDistance": 20,
+                "StopDistance": { "Compute": "AggroRange * 0.50" },
+                "RelativeSpeed": 1
+              }
+            },
+            {
+              "$Comment": "Wander se il target è fuori range",
+              "Sensor": {
+                "Type": "Any"
+              },
+              "BodyMotion": {
+                "Type": "WanderInCircle",
+                "Radius": 40,
+                "MaxHeadingChange": 1,
+                "RelativeSpeed": 1
               }
             }
           ]

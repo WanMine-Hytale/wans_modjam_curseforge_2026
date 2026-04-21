@@ -18,10 +18,6 @@ import net.wanmine.Modjam.managers.BossBarManager;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/**
- * Intercetta ogni danno ricevuto da un NPCEntity.
- * Eseguito nell'InspectDamageGroup: l'HP è già ridotto quando handle() viene chiamato.
- */
 public class VorthraxDamageSystem extends DamageEventSystem {
 
     private static final Query<EntityStore> QUERY = Query.and(new Query[]{
@@ -56,16 +52,25 @@ public class VorthraxDamageSystem extends DamageEventSystem {
 
         NPCEntity npc = (NPCEntity) archetypeChunk.getComponent(
                 index, NPCEntity.getComponentType());
+
         if (npc == null || !BossBarManager.BOSS_NAME.equals(npc.getRoleName())) return;
 
         EntityStatMap statMap = (EntityStatMap) archetypeChunk.getComponent(
                 index, EntityStatMap.getComponentType());
+
         if (statMap == null) return;
 
         EntityStatValue health = statMap.get(DefaultEntityStatTypes.getHealth());
         if (health == null) return;
 
+        float percent = health.asPercentage();
         Ref<EntityStore> vorthraxRef = archetypeChunk.getReferenceTo(index);
-        bossBarManager.onVorthraxDamaged(vorthraxRef, health.asPercentage(), store);
+
+        if (percent <= 0f) {
+            bossBarManager.onVorthraxDeath(vorthraxRef, store);
+            return;
+        }
+
+        bossBarManager.onVorthraxDamaged(vorthraxRef, percent, store);
     }
 }

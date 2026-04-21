@@ -1,51 +1,56 @@
 {
-  "Model": "Scarak_Seeker_Spitball",
+  "Model": "Fireball",
   "Physics": {
     "Type": "Standard",
-    "Gravity": 3,
-    "TerminalVelocityAir": 150,
+    "Gravity": 15,
+    "TerminalVelocityAir": 50,
     "TerminalVelocityWater": 15,
     "RotationMode": "Velocity",
     "Bounciness": 0.0,
     "SticksVertically": false
   },
-  "LaunchForce": 120,
+  "LaunchForce": 60,
   "SpawnOffset": {
-    "X": 0,
-    "Y": 0,
-    "Z": 0.5
+    "X": 0.0,
+    "Y": 1.0,
+    "Z": -10.0
   },
   "Interactions": {
+    "ProjectileSpawn": {
+      "Cooldown": { "Cooldown": 0 },
+      "Interactions": [
+        {
+          "Type": "Simple",
+          "Effects": {
+            "WorldParticles": [
+              { "SystemId": "Flamethrower" }
+            ]
+          }
+        }
+      ]
+    },
     "ProjectileHit": {
-      "Cooldown": {
-        "Cooldown": 0
-      },
+      "Cooldown": { "Cooldown": 0 },
       "Interactions": [
         {
           "Type": "DamageEntity",
           "Entity": "Target",
           "DamageCalculator": {
             "Type": "Absolute",
-            "BaseDamage": {
-              "Fire": 15
-            },
-            "RandomPercentageModifier": 0.1
+            "BaseDamage": { "Fire": 15 },
+            "RandomPercentageModifier": 0.5
           },
           "DamageEffects": {
-            "Knockback": {
-              "Force": 0.5
-            },
-            "WorldSoundEventId": "SFX_Unarmed_Impact",
+            "Knockback": { "Force": 1 },
+            "WorldSoundEventId": "SFX_Flame_Build",
             "WorldParticles": [
-              {
-                "SystemId": "Impact_Fire"
-              }
+              { "SystemId": "Impact_Fire" }
             ]
           },
           "Next": {
             "Type": "ApplyEffect",
             "Entity": "Target",
-            "EffectId": "Burn_T1"
+            "EffectId": "Flame_Staff_Burn"
           }
         },
         {
@@ -55,19 +60,14 @@
       ]
     },
     "ProjectileMiss": {
-      "Cooldown": {
-        "Cooldown": 0
-      },
+      "Cooldown": { "Cooldown": 0 },
       "Interactions": [
         {
           "Type": "Simple",
           "RunTime": 0,
           "Effects": {
-            "WorldSoundEventId": "SFX_Unarmed_Impact",
             "WorldParticles": [
-              {
-                "SystemId": "Impact_Fire"
-              }
+              { "SystemId": "Impact_Fire" }
             ]
           }
         },
