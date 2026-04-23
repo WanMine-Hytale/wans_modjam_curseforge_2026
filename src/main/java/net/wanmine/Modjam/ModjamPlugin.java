@@ -16,7 +16,6 @@ import net.wanmine.Modjam.entities.systems.FlyMountMovementSystem;
 import net.wanmine.Modjam.entities.systems.FlyMountSystems;
 
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import net.wanmine.Modjam.commands.ExampleCommand;
 import net.wanmine.Modjam.managers.BossBarManager;
 import net.wanmine.Modjam.systems.PlayerRangeTickSystem;
 import net.wanmine.Modjam.systems.VorthraxDamageSystem;
@@ -72,7 +71,6 @@ public class ModjamPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new FlyMountSystems.AddNetworkIdToFlyingEntitySystem());
 
         inboundFilter = PacketAdapters.registerInbound(new FlyMountInteractionsSystems.DismountPacketWatcher());
-        this.getCommandRegistry().registerCommand(new ExampleCommand("test", "test command"));
 
         if (NPCEntity.getComponentType() == null) {
             LOGGER.atWarning().log("MODERROR: NPCEntity component type not found!");
