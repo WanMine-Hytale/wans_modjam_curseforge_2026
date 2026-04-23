@@ -1,0 +1,76 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Rock_Crystal_Blue.name"
+  },
+  "Categories": [
+    "Furniture.Furniture"
+  ],
+  "SubCategory": "Crystal",
+  "PlayerAnimationsId": "Block",
+  "Interactions": {
+    "Secondary": "Lantern_Blue"
+  },
+  "BlockType": {
+    "Material": "Solid",
+    "DrawType": "Model",
+    "HitboxType": "Full",
+    "Flags": {},
+    "BlockParticleSetId": "Crystal",
+    "Textures": [
+      {
+        "Weight": 1,
+        "All": "BlockTextures/VorthraxEgg/Vorthrax_Egg.png"
+      }
+    ],
+    "ParticleColor": "#245bc1",
+    "BlockSoundSetId": "Crystal",
+    "CubeShadingMode": "Reflective",
+    "VariantRotation": "None",
+    "CustomModel": "Blocks/Vorthrax.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "BlockTextures/VorthraxEgg/Vorthrax_Egg.png"
+      }
+    ],
+    "FlipType": "Orthogonal",
+    "Light": {
+      "Color": "#8ae"
+    },
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "SpawnNPC",
+            "EntityId": "Vorthrax_Friendly",
+            "CancelOnItemChange": false,
+            "Next": {
+              "Type": "DestroyBlock"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Tags": {
+    "Type": [
+      "Rock"
+    ],
+    "Family": [
+      "Crystal"
+    ]
+  },
+  "IconProperties": {
+    "Scale": 0.58823,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -13.5
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "Icon": "Icons/ItemsGenerated/Rock_Test.png"
+}

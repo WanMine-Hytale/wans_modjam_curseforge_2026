@@ -1,0 +1,8 @@
+{
+  "Type": "Projectile",
+  "RunTime": 0.5,
+  "Config": "Projectile_Config_Vorthrax_Fireball",
+  "Tags": {
+    "AimingReference": []
+  }
+}

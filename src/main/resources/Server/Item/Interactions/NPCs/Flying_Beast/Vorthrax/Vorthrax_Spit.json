@@ -1,0 +1,9 @@
+{
+  "Type": "Simple",
+  "Effects": {
+    "ItemAnimationId": "Alerted"
+  },
+  "$Comment": "Prepare Delay",
+  "RunTime": 0.333,
+  "Next": "Vorthrax_Spit_Projectile"
+}

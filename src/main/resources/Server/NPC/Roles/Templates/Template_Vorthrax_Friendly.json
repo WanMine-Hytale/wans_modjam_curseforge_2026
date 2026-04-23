@@ -1,0 +1,741 @@
+{
+  "Type": "Abstract",
+  "Debug": "DisplayState",
+  "StartState": "Idle",
+  "Parameters": {
+    "Appearance": {
+      "Value": "Vorthrax",
+      "Description": "Model to be used"
+    },
+    "DropList": {
+      "Value": "Empty",
+      "Description": "Drop Items"
+    },
+    "FlockArray": {
+      "Value": [ "Vorthrax_Friendly" ],
+      "Description": "Array containing NPCs for this flock type"
+    },
+    "WanderRadius": {
+      "Value": 100,
+      "Description": "The radius used for wandering and leashing"
+    },
+    "MinHeightOverGround": {
+      "Value": 30,
+      "Description": "Min Height over ground"
+    },
+    "MaxHeightOverGround": {
+      "Value": 80,
+      "Description": "Max Height over ground"
+    },
+    "MaxHealth": {
+      "Value": 500,
+      "Description": "Max health for the NPC"
+    },
+    "IsMemory": {
+      "Value": false,
+      "Description": "Defines if the NPC is a memory"
+    },
+    "MemoriesCategory": {
+      "Value": "Other",
+      "Description": "Defines the category of the memory"
+    },
+    "MemoriesNameOverride": {
+      "Value": "",
+      "Description": "Overrides the memory name if set"
+    },
+    "NameTranslationKey": {
+      "Value": "Vorthrax_Friendly",
+      "Description": "Translation key for NPC name display"
+    },
+    "AggroRange": {
+      "Value": 80,
+      "Description": "Range at which the NPC spots and attacks other NPCs"
+    },
+    "Attack": {
+      "Value": "Root_NPC_Vorthrax_Attack",
+      "Description": "Attack Root Interaction asset"
+    },
+    "RangedAttack": {
+      "Value": "Root_NPC_Vorthrax_Spit",
+      "Description": "Ranged attack Root Interaction asset"
+    },
+    "RangedAttackDistance": {
+      "Value": 60,
+      "Description": "Distance at which the NPC uses ranged attack"
+    }
+  },
+  "IsMemory": { "Compute": "IsMemory" },
+  "MemoriesCategory": { "Compute": "MemoriesCategory" },
+  "MemoriesNameOverride": { "Compute": "MemoriesNameOverride" },
+  "DropList": { "Compute": "DropList" },
+  "FlockSpawnTypes": { "Compute": "FlockArray" },
+  "DisableDamageGroups": [ "Self" ],
+  "Appearance": { "Compute": "Appearance" },
+  "KnockbackScale": 0.5,
+  "MotionControllerList": [
+    {
+      "Type": "Fly",
+      "MaxHorizontalSpeed": 50,
+      "MaxSinkSpeed": 25,
+      "MaxClimbSpeed": 25,
+      "MinAirSpeed": 25,
+      "Acceleration": 40,
+      "MinHeightOverGround": { "Compute": "MinHeightOverGround" },
+      "MaxHeightOverGround": { "Compute": "MaxHeightOverGround" },
+      "MaxRollAngle": 180,
+      "MaxTurnSpeed": 360
+    }
+  ],
+  "MaxHealth": { "Compute": "MaxHealth" },
+  "Instructions": [
+    {
+      "Continue": true,
+      "Instructions": [
+        {
+          "$Comment": "Always open to receiving beacon messages",
+          "Sensor": {
+            "Type": "Beacon",
+            "Message": "Flock_Pos"
+          },
+          "Actions": [
+            {
+              "Type": "SetLeashPosition",
+              "ToTarget": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Instructions": [
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Idle"
+          },
+          "Instructions": [
+            {
+              "Sensor": {
+                "Type": "State",
+                "State": ".Default"
+              },
+              "Actions": [
+                {
+                  "Type": "PlayAnimation",
+                  "Slot": "Status"
+                },
+                {
+                  "Type": "State",
+                  "State": ".Fly"
+                }
+              ]
+            },
+            {
+              "Sensor": {
+                "Type": "State",
+                "State": ".Fly"
+              },
+              "Instructions": [
+                {
+                  "Sensor": {
+                    "Type": "Eval",
+                    "Expression": "blocked"
+                  },
+                  "Actions": [
+                    {
+                      "Type": "State",
+                      "State": ".Blocked"
+                    }
+                  ]
+                },
+                {
+                  "Continue": true,
+                  "Sensor": {
+                    "Type": "Any"
+                  },
+                  "Instructions": [
+                    {
+                      "Reference": "Component_Instruction_Spread_Out",
+                      "Modify": {
+                        "Range": 1
+                      }
+                    },
+                    {
+                      "Sensor": {
+                        "Type": "Leash",
+                        "Range": { "Compute": "WanderRadius" }
+                      },
+                      "BodyMotion": {
+                        "Type": "Seek",
+                        "SlowDownDistance": 1.5,
+                        "StopDistance": 1,
+                        "RelativeSpeed": 0.25
+                      }
+                    },
+                    {
+                      "Sensor": {
+                        "Type": "Any"
+                      },
+                      "BodyMotion": {
+                        "Type": "WanderInCircle",
+                        "Radius": { "Compute": "WanderRadius" },
+                        "MaxHeadingChange": 60,
+                        "RelativeSpeed": 0.25
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Sensor": {
+                    "Type": "And",
+                    "Sensors": [
+                      {
+                        "Type": "Or",
+                        "Sensors": [
+                          {
+                            "Type": "Self",
+                            "Filters": [
+                              {
+                                "Type": "Flock",
+                                "FlockStatus": "NotMember"
+                              }
+                            ]
+                          },
+                          {
+                            "Type": "And",
+                            "Sensors": [
+                              {
+                                "Type": "FlockLeader"
+                              },
+                              {
+                                "Type": "Self",
+                                "Filters": [
+                                  {
+                                    "Type": "Flock",
+                                    "FlockStatus": "Leader"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Type": "Leash",
+                        "Range": { "Compute": "WanderRadius + 1" }
+                      }
+                    ]
+                  },
+                  "Actions": [
+                    {
+                      "Type": "FlockBeacon",
+                      "Message": "Flock_Pos",
+                      "SendToSelf": false,
+                      "ExpirationTime": 0.5
+                    },
+                    {
+                      "Type": "SetLeashPosition",
+                      "ToCurrent": true
+                    }
+                  ]
+                },
+                {
+                  "$Comment": "Panico se colpito da danno ambientale (non da combattimento)",
+                  "Sensor": {
+                    "Type": "Damage",
+                    "Combat": false,
+                    "Other": true
+                  },
+                  "Actions": [
+                    {
+                      "Type": "State",
+                      "State": "Panic"
+                    }
+                  ]
+                },
+                {
+                  "$Comment": "Entra in Combat se colpito da un NPC/entity",
+                  "Sensor": {
+                    "Type": "Damage",
+                    "Combat": true,
+                    "TargetSlot": "LockedTarget"
+                  },
+                  "Actions": [
+                    {
+                      "Type": "State",
+                      "State": "Combat"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Sensor": {
+                "$TODO": "Remove this state and its references when there's a better way to handle being blocked",
+                "Type": "State",
+                "State": ".Blocked"
+              },
+              "Instructions": [
+                {
+                  "Continue": true,
+                  "Sensor": {
+                    "Type": "Any",
+                    "Once": true
+                  },
+                  "Actions": [
+                    {
+                      "Type": "PlayAnimation",
+                      "Slot": "Status",
+                      "Animation": "Walk"
+                    }
+                  ]
+                },
+                {
+                  "Sensor": {
+                    "Type": "Not",
+                    "Sensor": {
+                      "Type": "Eval",
+                      "Expression": "blocked"
+                    }
+                  },
+                  "Actions": [
+                    {
+                      "Type": "State",
+                      "State": ".Default"
+                    }
+                  ]
+                },
+                {
+                  "Sensor": {
+                    "Type": "Any"
+                  },
+                  "BodyMotion": {
+                    "Type": "Wander",
+                    "MinHeadingChange": 150,
+                    "MaxHeadingChange": 180,
+                    "RelativeSpeed": 1
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Panic"
+          },
+          "Instructions": [
+            {
+              "Continue": true,
+              "Sensor": {
+                "Type": "Any",
+                "Once": true
+              },
+              "Actions": [
+                {
+                  "Type": "PlayAnimation",
+                  "Slot": "Status",
+                  "Animation": "FlyFast"
+                }
+              ]
+            },
+            {
+              "Continue": true,
+              "Sensor": {
+                "Type": "Any"
+              },
+              "Instructions": [
+                {
+                  "Sensor": {
+                    "Type": "Eval",
+                    "Expression": "blocked"
+                  },
+                  "BodyMotion": {
+                    "Type": "Timer",
+                    "Time": [ 4, 8 ],
+                    "Motion": {
+                      "Type": "Wander",
+                      "MaxHeadingChange": 45,
+                      "RelativeSpeed": 1
+                    }
+                  }
+                },
+                {
+                  "Reference": "Component_Instruction_Spread_Out",
+                  "Modify": {
+                    "Range": 1,
+                    "RelativeSpeed": 1
+                  }
+                },
+                {
+                  "Sensor": {
+                    "Type": "Any"
+                  },
+                  "BodyMotion": {
+                    "Type": "Sequence",
+                    "Looped": true,
+                    "Motions": [
+                      {
+                        "Type": "Timer",
+                        "Time": [ 4, 8 ],
+                        "Motion": {
+                          "Type": "WanderInCircle",
+                          "Radius": 10,
+                          "MaxHeadingChange": 45,
+                          "RelativeSpeed": 1
+                        }
+                      },
+                      {
+                        "Type": "Timer",
+                        "Time": [ 3, 10 ],
+                        "Motion": {
+                          "Type": "WanderInCircle",
+                          "Radius": 10,
+                          "MaxHeadingChange": 90,
+                          "RelativeSpeed": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "Reference": "Component_Instruction_State_Timeout",
+              "Modify": {
+                "_ExportStates": [ "Idle" ],
+                "Delay": [ 3, 6 ]
+              }
+            }
+          ]
+        },
+        {
+          "Sensor": {
+            "Type": "State",
+            "State": "Combat"
+          },
+          "Instructions": [
+            {
+              "$Comment": "Animations",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Any",
+                "Once": true
+              },
+              "Actions": [
+                {
+                  "Type": "PlayAnimation",
+                  "Slot": "Status",
+                  "Animation": "FlyFast"
+                }
+              ]
+            },
+            {
+              "$Comment": "Target fuori range — insegui 5 secondi poi abbandona",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Not",
+                "Sensor": {
+                  "Type": "Target",
+                  "TargetSlot": "LockedTarget",
+                  "Range": { "Compute": "AggroRange" }
+                }
+              },
+              "Instructions": [
+                {
+                  "Reference": "Component_Instruction_State_Timeout",
+                  "Modify": {
+                    "_ExportStates": [ "Idle" ],
+                    "Delay": [ 5, 5 ]
+                  }
+                },
+                {
+                  "Sensor": {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget"
+                  },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": 30,
+                    "StopDistance": 20,
+                    "RelativeSpeed": 1
+                  }
+                },
+                {
+                  "Sensor": {
+                    "Type": "Any"
+                  },
+                  "BodyMotion": {
+                    "Type": "Wander",
+                    "MaxHeadingChange": 30,
+                    "RelativeSpeed": 0.5
+                  }
+                }
+              ]
+            },
+            {
+              "$Comment": "Ranged attack quando il target è a media distanza e non troppo vicino",
+              "Continue": true,
+              "Sensor": {
+                "Type": "And",
+                "Sensors": [
+                  {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": { "Compute": "RangedAttackDistance" },
+                    "Filters": [
+                      {
+                        "Type": "LineOfSight"
+                      }
+                    ]
+                  },
+                  {
+                    "Type": "Not",
+                    "Sensor": {
+                      "Type": "Target",
+                      "TargetSlot": "LockedTarget",
+                      "Range": 25
+                    }
+                  }
+                ]
+              },
+              "Actions": [
+                {
+                  "Type": "Attack",
+                  "Attack": { "Compute": "RangedAttack" },
+                  "BallisticMode": "Short",
+                  "AimingTimeRange": [ 1, 2 ],
+                  "AttackPauseRange": [ 2, 4 ]
+                }
+              ],
+              "HeadMotion": {
+                "Type": "Aim",
+                "Spread": 0,
+                "HitProbability": 1,
+                "Deflection": true
+              }
+            },
+            {
+              "$Comment": "Pattern A — Melee (50%): Seek + Attack + Strafe",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Random",
+                "TrueDurationRange": [ 3, 6 ],
+                "FalseDurationRange": [ 0.1, 0.1 ]
+              },
+              "Instructions": [
+                {
+                  "$Comment": "In range — attacca e vola attraverso",
+                  "Sensor": {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": 25,
+                    "Filters": [
+                      {
+                        "Type": "LineOfSight"
+                      }
+                    ]
+                  },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": 30,
+                    "StopDistance": 20,
+                    "RelativeSpeed": 1
+                  },
+                  "Actions": [
+                    {
+                      "Type": "Attack",
+                      "Attack": { "Compute": "Attack" },
+                      "AttackType": "Primary"
+                    },
+                    {
+                      "Type": "State",
+                      "State": "Strafe"
+                    }
+                  ]
+                },
+                {
+                  "$Comment": "Non ancora in range — avvicinati",
+                  "Sensor": {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": { "Compute": "AggroRange" }
+                  },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": 30,
+                    "StopDistance": 20,
+                    "RelativeSpeed": 1
+                  }
+                }
+              ]
+            },
+            {
+              "$Comment": "Pattern B — Fast charge (25%): stesso ma più veloce",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Random",
+                "TrueDurationRange": [ 3, 6 ],
+                "FalseDurationRange": [ 0.1, 0.1 ]
+              },
+              "Instructions": [
+                {
+                  "$Comment": "In range — carica veloce, attacca e vola attraverso",
+                  "Sensor": {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": 25,
+                    "Filters": [
+                      {
+                        "Type": "LineOfSight"
+                      }
+                    ]
+                  },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": 30,
+                    "StopDistance": 20,
+                    "RelativeSpeed": 1.5
+                  },
+                  "Actions": [
+                    {
+                      "Type": "Attack",
+                      "Attack": { "Compute": "Attack" },
+                      "AttackType": "Primary"
+                    },
+                    {
+                      "Type": "State",
+                      "State": "Strafe"
+                    }
+                  ]
+                },
+                {
+                  "$Comment": "Non ancora in range — carica veloce",
+                  "Sensor": {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": { "Compute": "AggroRange" }
+                  },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": 30,
+                    "StopDistance": 20,
+                    "RelativeSpeed": 1.5
+                  }
+                }
+              ]
+            },
+            {
+              "$Comment": "Pattern C — Ranged fallback (25%): avvicinati lentamente",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Any"
+              },
+              "Instructions": [
+                {
+                  "Sensor": {
+                    "Type": "Target",
+                    "TargetSlot": "LockedTarget",
+                    "Range": { "Compute": "AggroRange" }
+                  },
+                  "BodyMotion": {
+                    "Type": "Seek",
+                    "SlowDownDistance": 30,
+                    "StopDistance": 30,
+                    "RelativeSpeed": 0.75
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$Comment": "Strafe — continua dritto nella direzione attuale, poi vai in Retreat",
+          "Sensor": {
+            "Type": "State",
+            "State": "Strafe"
+          },
+          "Instructions": [
+            {
+              "Continue": true,
+              "Sensor": {
+                "Type": "Any"
+              },
+              "BodyMotion": {
+                "Type": "Wander",
+                "MinHeadingChange": 0,
+                "MaxHeadingChange": 0,
+                "RelativeSpeed": 1.5
+              }
+            },
+            {
+              "Reference": "Component_Instruction_State_Timeout",
+              "Modify": {
+                "_ExportStates": [ "Retreat" ],
+                "Delay": [ 0.5, 1 ]
+              }
+            }
+          ]
+        },
+        {
+          "$Comment": "Retreat — sale in quota e poi torna in Combat",
+          "Sensor": {
+            "Type": "State",
+            "State": "Retreat"
+          },
+          "Instructions": [
+            {
+              "$Comment": "Override altitudine ogni tick",
+              "Continue": true,
+              "Sensor": {
+                "Type": "Any"
+              },
+              "Actions": [
+                {
+                  "Type": "OverrideAltitude",
+                  "DesiredAltitudeRange": [ 80, 100 ]
+                }
+              ]
+            },
+            {
+              "$Comment": "Torna in Combat dopo aver preso quota",
+              "Reference": "Component_Instruction_State_Timeout",
+              "Modify": {
+                "_ExportStates": [ "Combat" ],
+                "Delay": [ 2, 4 ]
+              }
+            },
+            {
+              "$Comment": "Fuggi dal target mentre sali",
+              "Sensor": {
+                "Type": "Target",
+                "TargetSlot": "LockedTarget",
+                "Range": { "Compute": "AggroRange" }
+              },
+              "BodyMotion": {
+                "Type": "Flee",
+                "SlowDownDistance": 20,
+                "StopDistance": { "Compute": "AggroRange * 0.50" },
+                "RelativeSpeed": 1
+              }
+            },
+            {
+              "$Comment": "Wander se il target è fuori range",
+              "Sensor": {
+                "Type": "Any"
+              },
+              "BodyMotion": {
+                "Type": "WanderInCircle",
+                "Radius": 40,
+                "MaxHeadingChange": 1,
+                "RelativeSpeed": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "NameTranslationKey": { "Compute": "NameTranslationKey" }
+}

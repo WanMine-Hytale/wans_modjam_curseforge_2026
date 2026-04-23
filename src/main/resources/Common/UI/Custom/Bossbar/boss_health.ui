@@ -1,0 +1,36 @@
+Group #VorthraxHUD {
+  Anchor: (Top: 30, Left: 0, Right: 0, Height: 80);
+  LayoutMode: Top;
+  Padding: (Horizontal: 300);
+
+  Label #boss {
+    Anchor: (Height: 24, Top: 8);
+    Style: (
+      FontSize: 18,
+      TextColor: #ffffff,
+      HorizontalAlignment: Center
+    );
+    Text: "Vorthrax";
+  }
+
+  Group #healthbar {
+    Anchor: (Height: 20, Top: 8);
+    LayoutMode: Full;
+    Background: (Color: #222222);
+
+    Group #fill {
+      Anchor: (Full: 0);
+      Background: (Color: #2ecc71);
+    }
+
+    Label #health {
+      Anchor: (Full: 0);
+      Style: (
+        HorizontalAlignment: Center,
+        VerticalAlignment: Center,
+        TextColor: #ffffff,
+        FontSize: 13
+      );
+    }
+  }
+}
