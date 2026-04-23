@@ -1,0 +1,33 @@
+{
+    "Group": "WanMine",
+    "Name": "Modjam",
+    "Version": "1.0.0",
+    "Description": "Wan's Modjam",
+    "Authors": [
+        {
+            "Name": "WanMine"
+        },
+        {
+            "Name": "F36e"
+        },
+        {
+            "Name": "FonnyFofo"
+        },
+        {
+            "Name": "ImBau"
+        },
+        {
+            "Name": "Huggeitor"
+        }
+    ],
+    "Website": "https://wanmine.net",
+    "DisabledByDefault": false,
+    "IncludesAssetPack": true,
+    "Dependencies": {
+        "Hytale:EntityModule": "*",
+        "Hytale:NPC": "*",
+        "Hytale:Mounts": "*"
+    },
+    "ServerVersion": "2026.03.26-89796e57b",
+    "Main": "net.wanmine.Modjam.ModjamPlugin"
+}

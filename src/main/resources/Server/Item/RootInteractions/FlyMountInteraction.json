@@ -1,0 +1,6 @@
+{
+  "Interactions": ["FlyMountInteraction"],
+  "Rules": {
+    "AllowedGameModes": ["Adventure", "Survival"]
+  }
+}

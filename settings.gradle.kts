@@ -52,7 +52,8 @@ hytale {
                 ?: false
         Dependencies = mapOf(
             "Hytale:EntityModule" to "*",
-            "Hytale:NPC" to "*"
+            "Hytale:NPC" to "*",
+            "Hytale:Mounts" to "*",
         )
     }
 
