@@ -1,8 +1,8 @@
 {
   "Type": "Simple",
   "Effects": {
-    "ItemPlayerAnimationsId": "Bear_Grizzly_Default",
-    "ItemAnimationId": "Alerted"
+    "ItemPlayerAnimationsId": "Vorthrax_Default",
+    "ItemAnimationId": "Attack"
   },
   "$Comment": "Prepare Delay",
   "RunTime": 0.3,
@@ -17,7 +17,7 @@
             "RunTime": 0.25,
             "Selector": {
               "Id": "AOECircle",
-              "Range": 10
+              "Range": 22
             },
             "HitEntity": {
               "Interactions": [

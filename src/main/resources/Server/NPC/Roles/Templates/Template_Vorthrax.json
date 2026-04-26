@@ -520,7 +520,7 @@
                 {
                   "Type": "Attack",
                   "Attack": { "Compute": "RangedAttack" },
-                  "AimingTimeRange": [ 1, 2 ],
+                  "AimingTimeRange": [ 2, 2.5 ],
                   "AttackPauseRange": [ 2, 4 ]
                 }
               ],
@@ -528,7 +528,8 @@
                 "Type": "Aim",
                 "Spread": 0,
                 "HitProbability": 1,
-                "Deflection": true
+                "Deflection": true,
+                "RelativeTurnSpeed": 2
               }
             },
             {

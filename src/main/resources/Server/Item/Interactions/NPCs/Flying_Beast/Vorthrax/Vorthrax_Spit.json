@@ -1,7 +1,8 @@
 {
   "Type": "Simple",
   "Effects": {
-    "ItemAnimationId": "Alerted"
+    "ItemPlayerAnimationsId": "Vorthrax_Default",
+    "ItemAnimationId": "Spit"
   },
   "$Comment": "Prepare Delay",
   "RunTime": 0.333,

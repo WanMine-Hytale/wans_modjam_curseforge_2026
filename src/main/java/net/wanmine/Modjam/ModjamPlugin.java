@@ -11,9 +11,11 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import net.wanmine.Modjam.commands.AirshipsCommandCollection;
 import net.wanmine.Modjam.entities.components.*;
 import net.wanmine.Modjam.entities.components.attachments.FlyingSeatComponent;
+import net.wanmine.Modjam.entities.components.VorthraxDayNightComponent;
 import net.wanmine.Modjam.entities.systems.FlyMountInteractionsSystems;
 import net.wanmine.Modjam.entities.systems.FlyMountMovementSystem;
 import net.wanmine.Modjam.entities.systems.FlyMountSystems;
+import net.wanmine.Modjam.entities.systems.VorthraxDayNightSystem;
 
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import net.wanmine.Modjam.managers.BossBarManager;
@@ -29,6 +31,7 @@ public class ModjamPlugin extends JavaPlugin {
     public static ComponentType<EntityStore, FlyingEntityComponent> flyingEntityComponent;
     public static ComponentType<EntityStore, FlyingSeatComponent> flyingSeatComponent;
     public static ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponent;
+    public static ComponentType<EntityStore, VorthraxDayNightComponent> vorthraxDayNightComponent;
 
     private static ModjamPlugin instance;
     private BossBarManager bossBarManager;
@@ -40,13 +43,8 @@ public class ModjamPlugin extends JavaPlugin {
     }
 
     private PacketFilter inboundFilter;
-    public BossBarManager getBossBarManager() {
-        return bossBarManager;
-    }
-
-    public static ModjamPlugin getInstance() {
-        return instance;
-    }
+    public BossBarManager getBossBarManager() { return bossBarManager; }
+    public static ModjamPlugin getInstance() { return instance; }
 
     @Override
     protected void setup() {
@@ -56,6 +54,13 @@ public class ModjamPlugin extends JavaPlugin {
         flyingDriverComponent = this.getEntityStoreRegistry().registerComponent(FlyingDriverComponent.class, "FlyingDriver", FlyingDriverComponent.CODEC);
         flyingEntityComponent = this.getEntityStoreRegistry().registerComponent(FlyingEntityComponent.class, "FlyingEntity", FlyingEntityComponent.CODEC);
         this.getCodecRegistry(Interaction.CODEC).register("FlyMountInteraction", FlyMountInteractionsSystems.MountInteraction.class, FlyMountInteractionsSystems.MountInteraction.CODEC);
+
+        vorthraxDayNightComponent = this.getEntityStoreRegistry().registerComponent(
+                VorthraxDayNightComponent.class,
+                "VorthraxDayNight",
+                VorthraxDayNightComponent.CODEC
+        );
+        VorthraxDayNightComponent.TYPE = vorthraxDayNightComponent;
 
         this.getCommandRegistry().registerCommand(new AirshipsCommandCollection("airships", "Airships command"));
 
@@ -82,8 +87,8 @@ public class ModjamPlugin extends JavaPlugin {
         getEntityStoreRegistry().registerSystem(new VorthraxTrackerSystem(bossBarManager));
         getEntityStoreRegistry().registerSystem(new VorthraxDamageSystem(bossBarManager));
         getEntityStoreRegistry().registerSystem(new PlayerRangeTickSystem(bossBarManager));
+        getEntityStoreRegistry().registerSystem(new VorthraxDayNightSystem());
     }
-
 
     @Override
     protected void start() {
