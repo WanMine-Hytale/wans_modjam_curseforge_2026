@@ -2,7 +2,13 @@
   "Type": "Simple",
   "Effects": {
     "ItemPlayerAnimationsId": "Vorthrax_Default",
-    "ItemAnimationId": "Spit"
+    "ItemAnimationId": "Spit",
+    "Particles": [
+      {
+        "SystemId": "Fire_Projectile"
+      }
+    ],
+    "WorldSoundEventId": "SFX_Vorthrax_Scream"
   },
   "$Comment": "Prepare Delay",
   "RunTime": 0.333,
