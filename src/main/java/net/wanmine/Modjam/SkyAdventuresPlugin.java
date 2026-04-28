@@ -25,7 +25,7 @@ import net.wanmine.Modjam.systems.VorthraxTrackerSystem;
 
 import javax.annotation.Nonnull;
 
-public class ModjamPlugin extends JavaPlugin {
+public class SkyAdventuresPlugin extends JavaPlugin {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     public static ComponentType<EntityStore, FlyingEntityComponent> flyingEntityComponent;
@@ -33,10 +33,10 @@ public class ModjamPlugin extends JavaPlugin {
     public static ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponent;
     public static ComponentType<EntityStore, VorthraxDayNightComponent> vorthraxDayNightComponent;
 
-    private static ModjamPlugin instance;
+    private static SkyAdventuresPlugin instance;
     private BossBarManager bossBarManager;
 
-    public ModjamPlugin(@Nonnull JavaPluginInit init) {
+    public SkyAdventuresPlugin(@Nonnull JavaPluginInit init) {
         super(init);
         instance = this;
         LOGGER.atInfo().log("Plugin Loaded: %s (version: %s)", this.getName(), this.getManifest().getVersion().toString());
@@ -44,7 +44,7 @@ public class ModjamPlugin extends JavaPlugin {
 
     private PacketFilter inboundFilter;
     public BossBarManager getBossBarManager() { return bossBarManager; }
-    public static ModjamPlugin getInstance() { return instance; }
+    public static SkyAdventuresPlugin getInstance() { return instance; }
 
     @Override
     protected void setup() {

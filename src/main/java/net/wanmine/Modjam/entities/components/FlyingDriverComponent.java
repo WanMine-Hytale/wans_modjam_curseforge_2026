@@ -9,7 +9,7 @@ import com.hypixel.hytale.protocol.MountController;
 import com.hypixel.hytale.protocol.MovementStates;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import net.wanmine.Modjam.ModjamPlugin;
+import net.wanmine.Modjam.SkyAdventuresPlugin;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -133,7 +133,7 @@ public class FlyingDriverComponent implements Component<EntityStore> {
     }
 
     public static ComponentType<EntityStore, FlyingDriverComponent> getComponentType() {
-        return ModjamPlugin.flyingDriverComponent;
+        return SkyAdventuresPlugin.flyingDriverComponent;
     }
 
     public void setMoveForward(float moveForward) {

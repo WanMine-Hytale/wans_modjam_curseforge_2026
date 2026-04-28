@@ -1,18 +1,18 @@
 {
   "Environments": [
-    "Env_Zone1_Plains",
-    "Env_Zone4_Volcanoes"
+    "Env_Zone4_Wastes",
+    "Env_Zone4_Volcanoes",
+    "Env_Zone4_Forests"
   ],
   "NPCs": [
     {
       "Weight": 1,
-      "SpawnBlockSet": "Birds",
       "Id": "Vorthrax",
       "Size": 1
     }
   ],
   "DayTimeRange": [
-    6,
-    18
+    0,
+    24
   ]
 }
