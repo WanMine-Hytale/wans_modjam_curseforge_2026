@@ -54,6 +54,7 @@ public class ModjamPlugin extends JavaPlugin {
         flyingDriverComponent = this.getEntityStoreRegistry().registerComponent(FlyingDriverComponent.class, "FlyingDriver", FlyingDriverComponent.CODEC);
         flyingEntityComponent = this.getEntityStoreRegistry().registerComponent(FlyingEntityComponent.class, "FlyingEntity", FlyingEntityComponent.CODEC);
         this.getCodecRegistry(Interaction.CODEC).register("FlyMountInteraction", FlyMountInteractionsSystems.MountInteraction.class, FlyMountInteractionsSystems.MountInteraction.CODEC);
+        this.getCodecRegistry(Interaction.CODEC).register("AirshipCrateInteraction", FlyMountInteractionsSystems.AirshipCrateInteraction.class, FlyMountInteractionsSystems.AirshipCrateInteraction.CODEC);
 
         vorthraxDayNightComponent = this.getEntityStoreRegistry().registerComponent(
                 VorthraxDayNightComponent.class,

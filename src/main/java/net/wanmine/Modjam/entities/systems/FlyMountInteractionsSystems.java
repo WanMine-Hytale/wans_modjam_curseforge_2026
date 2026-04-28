@@ -7,19 +7,23 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
-import com.hypixel.hytale.protocol.InteractionState;
-import com.hypixel.hytale.protocol.InteractionType;
-import com.hypixel.hytale.protocol.Packet;
+import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.protocol.*;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.auth.PlayerAuthentication;
+import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.io.adapter.PacketWatcher;
+import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
+
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.client.SimpleBlockInteraction;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -27,8 +31,11 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import net.wanmine.Modjam.entities.components.FlyingDriverComponent;
 import net.wanmine.Modjam.entities.components.FlyingEntityComponent;
 import net.wanmine.Modjam.utils.AirshipFactory;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class FlyMountInteractionsSystems {
@@ -142,5 +149,74 @@ public class FlyMountInteractionsSystems {
                 }
             }
         }
+    }
+
+    public static class AirshipCrateInteraction extends SimpleBlockInteraction {
+        private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+
+        public static final BuilderCodec<FlyMountInteractionsSystems.AirshipCrateInteraction> CODEC = BuilderCodec.builder(
+                FlyMountInteractionsSystems.AirshipCrateInteraction.class, FlyMountInteractionsSystems.AirshipCrateInteraction::new, SimpleBlockInteraction.CODEC
+        ).build();
+
+
+        public AirshipCrateInteraction() {
+            LOGGER.atInfo().log("AirshipCrateInteraction Registered");
+        }
+
+        @Override
+        protected void interactWithBlock(@NonNullDecl World world, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl InteractionType interactionType, @NonNullDecl InteractionContext ctx, @Nullable ItemStack itemStack, @Nonnull Vector3i vector3i, @Nonnull CooldownHandler cooldownHandler) {
+            if(interactionType != InteractionType.Use)
+                return;
+
+            Ref<EntityStore> targetRef = ctx.getTargetEntity();
+            BlockPosition targetBlock = ctx.getTargetBlock();
+
+            Ref<EntityStore> ref = ctx.getEntity();
+            Store<EntityStore> store = ref.getStore();
+            Player playerComponent = commandBuffer.getComponent(ref, Player.getComponentType());
+            if(playerComponent == null)
+                return;
+
+            Ref<EntityStore> playerEntityRef = playerComponent.getReference();
+            if (playerEntityRef == null || !playerEntityRef.isValid()) {
+                LOGGER.atWarning().log("No playerEntityRef?");
+                return;
+            }
+
+
+            TransformComponent playerTransform = store.getComponent(
+                    playerEntityRef,
+                    EntityModule.get().getTransformComponentType()
+            );
+            if (playerTransform == null) {
+                LOGGER.atWarning().log("No player transform?");
+                return;
+            }
+
+            world.execute(() -> {
+                store.tryRemoveComponent(playerEntityRef, FlyingDriverComponent.getComponentType());
+
+                if (store.getComponent(playerEntityRef, FlyingDriverComponent.getComponentType()) != null) {
+                    LOGGER.atWarning().log("Player already has FlyingDriverComponent!");
+                    return;
+                }
+
+                Vector3f baseRot = playerTransform.getRotation().clone();
+                Vector3d cratePosition = new Vector3d(targetBlock.x, targetBlock.y, targetBlock.z);
+
+                AirshipFactory.spawnMount(store, cratePosition, baseRot);
+
+                world.setBlock(vector3i.x, vector3i.y, vector3i.z, "Empty");
+            });
+
+        }
+
+
+
+        @Override
+        protected void simulateInteractWithBlock(@NonNullDecl InteractionType interactionType, @NonNullDecl InteractionContext interactionContext, @NullableDecl ItemStack itemStack, @NonNullDecl World world, @NonNullDecl Vector3i vector3i) {
+
+        }
+
     }
 }

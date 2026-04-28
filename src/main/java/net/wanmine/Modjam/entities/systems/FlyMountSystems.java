@@ -77,20 +77,6 @@ public final class FlyMountSystems {
         );
     }
 
-    private static void hideMountedPlayer(@Nonnull Ref<EntityStore> playerRef, @Nonnull Store<EntityStore> store) {
-        PlayerRef player = store.getComponent(playerRef, PlayerRef.getComponentType());
-        if (player == null) {
-            return;
-        }
-    }
-
-    private static void showMountedPlayer(@Nonnull Ref<EntityStore> playerRef, @Nonnull Store<EntityStore> store) {
-        PlayerRef player = store.getComponent(playerRef, PlayerRef.getComponentType());
-        if (player == null) {
-            return;
-        }
-    }
-
     private static void handleFlyingMountedRemoval(@Nonnull Ref<EntityStore> playerRef, @Nonnull CommandBuffer<EntityStore> commandBuffer, @Nonnull FlyingDriverComponent driver) {
         Ref<EntityStore> seatRef = driver.getSeatRef();
         if (seatRef != null && seatRef.isValid()) {
@@ -214,7 +200,6 @@ public final class FlyMountSystems {
         private void clearDriver(@Nonnull Ref<EntityStore> playerRef, @Nonnull Player player, @Nonnull FlyingDriverComponent driver, @Nonnull Store<EntityStore> store, @Nonnull CommandBuffer<EntityStore> commandBuffer) {
             handleFlyingMountedRemoval(playerRef, commandBuffer, driver);
             resetFlyMountCamera(playerRef, store);
-            showMountedPlayer(playerRef, store);
             player.setMountEntityId(0);
             driver.setMoveForward(0f);
             driver.setMoveStrafe(0f);
@@ -271,8 +256,6 @@ public final class FlyMountSystems {
                 applyFlyMountCamera(ref, flyerRef, store);
             }
 
-            hideMountedPlayer(ref, store);
-
             component.markNetworkOutdated();
         }
 
@@ -290,7 +273,6 @@ public final class FlyMountSystems {
             }
 
             resetFlyMountCamera(ref, store);
-            showMountedPlayer(ref, store);
         }
     }
 
@@ -477,12 +459,6 @@ public final class FlyMountSystems {
             playerTransform.setRotation(targetRot);
             playerTransform.markChunkDirty(store);
 
-/*            ModelComponent modelComponent = archetypeChunk.getComponent(index, ModelComponent.getComponentType());
-            if (modelComponent != null) {
-                Model model = modelComponent.getModel();
-                System.out.println(model.getAnimationSetMap().keySet());
-            }*/
-
             boolean currentFlyState = movementManager.getSettings().canFly;
             if (!currentFlyState) {
                 movementManager.getSettings().canFly = true;
@@ -546,7 +522,6 @@ public final class FlyMountSystems {
             }
 
             resetFlyMountCamera(ref, store);
-            showMountedPlayer(ref, store);
         }
 
         @Nonnull
@@ -578,7 +553,6 @@ public final class FlyMountSystems {
                 FlyingDriverComponent driver = commandBuffer.getComponent(playerRef, flyingDriverComponentType);
                 if (driver != null) {
                     resetFlyMountCamera(playerRef, store);
-                    showMountedPlayer(playerRef, store);
                     commandBuffer.removeComponent(playerRef, flyingDriverComponentType);
                 }
             }
@@ -648,7 +622,6 @@ public final class FlyMountSystems {
             if (!seatRef.equals(driverSeatRef) || seatFlyerRef == null || !seatFlyerRef.equals(driverFlyerRef)) {
                 seat.setPlayerRef(null);
                 resetFlyMountCamera(playerRef, store);
-                showMountedPlayer(playerRef, store);
                 commandBuffer.removeComponent(playerRef, flyingDriverComponentType);
             }
         }

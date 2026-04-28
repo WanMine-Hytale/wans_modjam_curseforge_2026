@@ -24,15 +24,58 @@ import net.wanmine.Modjam.entities.components.attachments.FlyingSeatComponent;
 public class AirshipFactory {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-
     public static Ref<EntityStore> spawnMount(Store<EntityStore> store, Vector3d position, Vector3f rotation) {
-        ModelAsset mountModelAsset = ModelAsset.getAssetMap().getAsset("Airship_Two");
+        ModelAsset mountModelAsset = ModelAsset.getAssetMap().getAsset("Airship");
         if (mountModelAsset == null) {
             LOGGER.atWarning().log("No mount model asset?");
             return null;
         }
 
         Model mountModel = Model.createScaledModel(mountModelAsset, 2.0f);
+
+        TransformComponent mountTransform = new TransformComponent();
+        mountTransform.setPosition(position.clone());
+        mountTransform.getRotation().assign(rotation);
+
+        FlyingEntityComponent flyingEntity = new FlyingEntityComponent();
+        flyingEntity.ySpeed = 0.0;
+        flyingEntity.currentSpeed = 0.0;
+        flyingEntity.hoverTargetY = position.y;
+
+        Holder<EntityStore> mountHolder = EntityStore.REGISTRY.newHolder();
+        mountHolder.addComponent(FlyingEntityComponent.getComponentType(), flyingEntity);
+        mountHolder.addComponent(TransformComponent.getComponentType(), mountTransform);
+        mountHolder.addComponent(PersistentModel.getComponentType(), new PersistentModel(mountModel.toReference()));
+        mountHolder.addComponent(ModelComponent.getComponentType(), new ModelComponent(mountModel));
+        mountHolder.addComponent(BoundingBox.getComponentType(), new BoundingBox(mountModel.getBoundingBox()));
+        mountHolder.addComponent(NetworkId.getComponentType(), new NetworkId(store.getExternalData().takeNextNetworkId()));
+        /*mountHolder.addComponent(Nameplate.getComponentType(), new Nameplate("Mount"));*/
+        mountHolder.addComponent(HeadRotation.getComponentType(), new HeadRotation(rotation));
+        mountHolder.ensureComponent(UUIDComponent.getComponentType());
+
+        mountHolder.ensureComponent(Interactable.getComponentType());
+        Interactions interactions = new Interactions();
+        interactions.setInteractionId(InteractionType.Use, "FlyMountInteraction");
+        mountHolder.addComponent(Interactions.getComponentType(), interactions);
+
+        Ref<EntityStore> mountRef = store.addEntity(mountHolder, AddReason.SPAWN);
+        if (mountRef == null || !mountRef.isValid()) {
+            LOGGER.atWarning().log("Failed to spawn mount");
+            return null;
+        }
+
+        return mountRef;
+    }
+
+    public static Ref<EntityStore> spawnMount(Store<EntityStore> store, Vector3d position, Vector3f rotation, float initialScale) {
+        ModelAsset mountModelAsset = ModelAsset.getAssetMap().getAsset("Airship");
+        if (mountModelAsset == null) {
+            LOGGER.atWarning().log("No mount model asset?");
+            return null;
+        }
+
+
+        Model mountModel = Model.createScaledModel(mountModelAsset, initialScale > 0.0f ? initialScale : 2.0f);
 
         TransformComponent mountTransform = new TransformComponent();
         mountTransform.setPosition(position.clone());
@@ -95,7 +138,7 @@ public class AirshipFactory {
                                              Ref<EntityStore> playerRef,
                                              Vector3d position,
                                              Vector3f rotation) {
-        ModelAsset seatModelAsset = ModelAsset.getAssetMap().getAsset("Airship_Cube");
+        ModelAsset seatModelAsset = ModelAsset.getAssetMap().getAsset("Airship_DriverSeat");
         if (seatModelAsset == null) {
             LOGGER.atWarning().log("No seat model asset?");
             return null;
@@ -142,6 +185,8 @@ public class AirshipFactory {
         flyingEntity.addAttachment(uuidComponent.getUuid(), seatRef, mountRef, store, FlyingSeatComponent.getComponentType());
         flyingEntity.setDriverSeat(seatRef);
 
+
+
         return seatRef;
     }
 
@@ -161,7 +206,7 @@ public class AirshipFactory {
             return;
         }
 
-        Vector3f attachmentOffset = new Vector3f(0.0F, 0.5F, 0.0F);
+        Vector3f attachmentOffset = new Vector3f(0.0F, 0.3F, 0.0F);
 
         FlyingDriverComponent driver = new FlyingDriverComponent();
         driver.setFlyerRef(mountRef);
@@ -174,6 +219,8 @@ public class AirshipFactory {
 
         FlyingEntityComponent flyingEntity = store.getComponent(mountRef, FlyingEntityComponent.getComponentType());
         if (flyingEntity != null) flyingEntity.setDriver(playerRef);
+
+        AnimationUtils.playAnimation(mountRef, AnimationSlot.Movement, null, "Forward", true, store);
     }
 
     public static void dismountPlayer(Store<EntityStore> store,
@@ -215,5 +262,7 @@ public class AirshipFactory {
         movementStatesComponent.setMovementStates(movementStates);
 
         player.setMountEntityId(-1);
+
+        AnimationUtils.stopAnimation(mountRef, AnimationSlot.Movement, true, store);
     }
 }

@@ -1,0 +1,58 @@
+{
+  "Model": "NPC/Vehicles/Airship/Airship.blockymodel",
+  "Texture": "NPC/Vehicles/Airship/Textures/texture.png",
+  "EyeHeight": 1,
+  "HitBox": {
+    "Max": {
+      "X": 0.45,
+      "Y": 0.45,
+      "Z": 0.45
+    },
+    "Min": {
+      "X": -0.45,
+      "Y": 0,
+      "Z": -0.45
+    }
+  },
+  "MinScale": 1,
+  "MaxScale": 1,
+  "AnimationSets": {
+    "WheelLeft": {
+      "Animations": [
+        {
+          "Animation": "NPC/Vehicles/Airship/Animations/Wheel/wheel_left.blockyanim",
+          "BlendingDuration": 0.5,
+          "Looping": false
+        }
+      ]
+    },
+    "WheelRight": {
+      "Animations": [
+        {
+          "Animation": "NPC/Vehicles/Airship/Animations/Wheel/wheel_right.blockyanim",
+          "BlendingDuration": 0.5,
+          "Looping": false
+        }
+      ]
+    },
+    "Forward": {
+      "Animations": [
+        {
+          "Animation": "NPC/Vehicles/Airship/Animations/Rotors/rotors.blockyanim",
+          "BlendingDuration": 0.0,
+          "Speed": 10.0,
+          "Looping": true
+        }
+      ]
+    },
+    "Idle": {
+      "Animations": [
+        {
+          "Animation": "NPC/Vehicles/Airship/Animations/idle.blockyanim",
+          "BlendingDuration": 0.0,
+          "Looping": true
+        }
+      ]
+    }
+  }
+}

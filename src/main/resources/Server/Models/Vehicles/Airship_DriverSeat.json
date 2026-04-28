@@ -1,0 +1,19 @@
+{
+  "Model": "NPC/Vehicles/Airship/Airship_DriverSeat.blockymodel",
+  "Texture": "NPC/Vehicles/Airship/Textures/texture.png",
+  "EyeHeight": 1,
+  "HitBox": {
+    "Max": {
+      "X": 0.45,
+      "Y": 0.45,
+      "Z": 0.45
+    },
+    "Min": {
+      "X": -0.45,
+      "Y": 0,
+      "Z": -0.45
+    }
+  },
+  "MinScale": 1,
+  "MaxScale": 1
+}

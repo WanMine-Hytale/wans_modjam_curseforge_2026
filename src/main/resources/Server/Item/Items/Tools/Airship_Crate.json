@@ -1,0 +1,67 @@
+{
+  "TranslationProperties": {
+    "Name": "airships.item.name",
+    "Description": "airships.item.description"
+  },
+  "Icon": "Icons/ItemsGenerated/Furniture_Village_Crate.png",
+  "Categories": ["Items.Tools"],
+  "PlayerAnimationsId": "Block",
+  "BlockType": {
+    "Material": "Solid",
+    "DrawType": "Model",
+    "Opacity": "Transparent",
+    "Group": "@Tech",
+    "BlockParticleSetId": "Wood",
+    "ParticleColor": "#3f2720",
+    "BlockSoundSetId": "Wood",
+    "CustomModel": "Blocks/AirshipCrate/AirshipCrate.blockymodel",
+    "CustomModelTexture": [
+      { "Texture": "BlockTextures/AirshipCrate/Furniture_Village_Crate.png" }
+    ],
+    "HitboxType": "Chest_Small",
+    "InteractionHitboxType": "Chest_Small",
+    "Flags": {
+      "IsUsable": true
+    },
+    "InteractionHint": "airships.block.interact",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "AirshipCrateInteraction"
+          }
+        ]
+      }
+    },
+    "State": {
+      "Definitions": {
+        "Default": {},
+        "Opening": {
+          "CustomModelAnimation": "Blocks/AirshipCrate/Animations/opening.blockyanim"
+        }
+      }
+    }
+  },
+  "ItemSoundSetId": "ISS_Blocks_Wood",
+  "FuelQuality": 0,
+  "MaxStack": 1,
+  "Recipe": {
+    "BenchRequirement": [
+      {
+        "Type": "Crafting",
+        "RequiredTierLevel": 2,
+        "Id": "Workbench",
+        "Categories": ["Workbench_Tinkering"]
+      }
+    ],
+    "TimeSeconds": 30,
+    "Input": [
+      { "ItemId": "Ingredient_Bar_Copper", "Quantity": 100 },
+      { "ItemId": "Wood_Hardwood_Planks", "Quantity": 100 },
+      { "ItemId": "Ingredient_Fabric_Scrap_Linen", "Quantity": 40 },
+      { "ItemId": "Ingredient_Fibre", "Quantity": 20 }
+    ]
+  },
+  "Quality": "Epic",
+  "ItemLevel": 0
+}

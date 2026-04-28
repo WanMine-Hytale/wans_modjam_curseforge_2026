@@ -27,6 +27,9 @@ public class FlyingEntityComponent implements Component<EntityStore> {
     private final Map<UUID, Ref<EntityStore>> seats = new ConcurrentHashMap<>();
 
 
+    public String lastAnimation = "";
+    public String lastWheelAnimation = "";
+
     private Ref<EntityStore> driver = null;
     private Ref<EntityStore> driverSeat = null;
 
