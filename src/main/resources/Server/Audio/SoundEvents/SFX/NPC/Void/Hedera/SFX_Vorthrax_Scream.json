@@ -2,7 +2,9 @@
   "Layers": [
     {
       "Files": [
-        "Sounds/NPC/Void/Hedera/Hedera_Scream_01.ogg"
+        "Sounds/NPC/Beasts/Golem_Crystal/General/Golem_Gen_VO_Death_01.ogg",
+        "Sounds/NPC/Beasts/Golem_Crystal/General/Golem_Gen_VO_Death_02.ogg",
+        "Sounds/NPC/Beasts/Golem_Crystal/General/Golem_Gen_VO_Death_03.ogg"
       ],
       "StartDelay": 0.3,
       "RandomSettings": {
@@ -11,11 +13,12 @@
         "MinVolume": -0.9151498112135024,
         "MaxStartOffset": 0
       },
+      "Probability": 100,
       "Volume": 4
     }
   ],
   "PreventSoundInterruption": true,
-  "AudioCategory": "AudioCat_NPC_Hedera",
+  "AudioCategory": "AudioCat_NPC_Golem_Earth",
   "Parent": "SFX_Attn_Moderate",
   "MaxDistance": 100
 }

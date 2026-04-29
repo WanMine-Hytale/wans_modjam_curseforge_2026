@@ -7,8 +7,7 @@
   "NPCs": [
     {
       "Weight": 1,
-      "Id": "Vorthrax",
-      "Size": 1
+      "Id": "Vorthrax"
     }
   ],
   "DayTimeRange": [

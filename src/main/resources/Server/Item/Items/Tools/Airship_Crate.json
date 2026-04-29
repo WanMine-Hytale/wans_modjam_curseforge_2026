@@ -54,7 +54,7 @@
         "Categories": ["Workbench_Tinkering"]
       }
     ],
-    "TimeSeconds": 30,
+    "TimeSeconds": 15,
     "Input": [
       { "ItemId": "Ingredient_Bar_Copper", "Quantity": 100 },
       { "ItemId": "Wood_Hardwood_Planks", "Quantity": 100 },
