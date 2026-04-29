@@ -33,7 +33,7 @@ hytale {
     manifest {
         Name = property("projectName", "Wan's HytaleTemplate")
         Group = property("hytale.group", "WanMine")
-        Version = property("projectVersion", "1.0.0")
+        Version = property("projectVersion", "1.0.1")
         Description = property("projectDescription", "Hytale Template Mod")
 
         Authors =
