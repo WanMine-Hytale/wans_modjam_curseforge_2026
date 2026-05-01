@@ -22,7 +22,7 @@
         ]
       }
     ],
-    "TimeSeconds": 30,
+    "TimeSeconds": 15,
     "Input": [
       {
         "ItemId": "Ingredient_Bar_Copper",
