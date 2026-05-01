@@ -75,6 +75,7 @@ public class SkyAdventuresPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new FlyMountSystems.RemoveDriver());
         this.getEntityStoreRegistry().registerSystem(new FlyMountSystems.RemoveSeat());
         this.getEntityStoreRegistry().registerSystem(new FlyMountSystems.AddNetworkIdToFlyingEntitySystem());
+        this.getEntityStoreRegistry().registerSystem(new FlyMountSystems.InitialScaleUpSystem());
 
         inboundFilter = PacketAdapters.registerInbound(new FlyMountInteractionsSystems.DismountPacketWatcher());
 

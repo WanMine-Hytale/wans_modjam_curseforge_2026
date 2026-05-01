@@ -74,17 +74,22 @@ public class AirshipFactory {
             return null;
         }
 
-
-        Model mountModel = Model.createScaledModel(mountModelAsset, initialScale > 0.0f ? initialScale : 2.0f);
-
-        TransformComponent mountTransform = new TransformComponent();
-        mountTransform.setPosition(position.clone());
-        mountTransform.getRotation().assign(rotation);
+        float scale = Math.clamp(initialScale, 0.0f, FlyingEntityComponent.DEFAULT_MODEL_SCALE);
+        Model mountModel = Model.createScaledModel(mountModelAsset, scale);
 
         FlyingEntityComponent flyingEntity = new FlyingEntityComponent();
         flyingEntity.ySpeed = 0.0;
         flyingEntity.currentSpeed = 0.0;
         flyingEntity.hoverTargetY = position.y;
+        flyingEntity.setModelScale(scale);
+        if (scale < FlyingEntityComponent.DEFAULT_MODEL_SCALE) {
+            flyingEntity.setReadyToFly(false);
+        }
+
+        TransformComponent mountTransform = new TransformComponent();
+        mountTransform.setPosition(position.clone());
+        mountTransform.getRotation().assign(rotation);
+
 
         Holder<EntityStore> mountHolder = EntityStore.REGISTRY.newHolder();
         mountHolder.addComponent(FlyingEntityComponent.getComponentType(), flyingEntity);

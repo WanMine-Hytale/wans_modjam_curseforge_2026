@@ -27,6 +27,25 @@ public class FlyingEntityComponent implements Component<EntityStore> {
     private final Map<UUID, Ref<EntityStore>> seats = new ConcurrentHashMap<>();
 
 
+
+    public static final float DEFAULT_MODEL_SCALE = 2.0f;
+    private float modelScale = 2.0f;
+    public float getModelScale() {
+        return modelScale;
+    }
+    public void setModelScale(float newScale) {
+        this.modelScale = newScale;
+    }
+
+    private boolean readyToFly = false;
+    public boolean isReadyToFly() {
+        return readyToFly;
+    }
+    public void setReadyToFly(boolean newState) {
+        this.readyToFly = newState;
+    }
+
+
     public String lastAnimation = "";
     public String lastWheelAnimation = "";
 

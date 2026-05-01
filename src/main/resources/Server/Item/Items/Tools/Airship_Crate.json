@@ -4,44 +4,10 @@
     "Description": "airships.item.description"
   },
   "Icon": "Icons/ItemsGenerated/Furniture_Village_Crate.png",
-  "Categories": ["Items.Tools"],
+  "Categories": [
+    "Items.Tools"
+  ],
   "PlayerAnimationsId": "Block",
-  "BlockType": {
-    "Material": "Solid",
-    "DrawType": "Model",
-    "Opacity": "Transparent",
-    "Group": "@Tech",
-    "BlockParticleSetId": "Wood",
-    "ParticleColor": "#3f2720",
-    "BlockSoundSetId": "Wood",
-    "CustomModel": "Blocks/AirshipCrate/AirshipCrate.blockymodel",
-    "CustomModelTexture": [
-      { "Texture": "BlockTextures/AirshipCrate/Furniture_Village_Crate.png" }
-    ],
-    "HitboxType": "Chest_Small",
-    "InteractionHitboxType": "Chest_Small",
-    "Flags": {
-      "IsUsable": true
-    },
-    "InteractionHint": "airships.block.interact",
-    "Interactions": {
-      "Use": {
-        "Interactions": [
-          {
-            "Type": "AirshipCrateInteraction"
-          }
-        ]
-      }
-    },
-    "State": {
-      "Definitions": {
-        "Default": {},
-        "Opening": {
-          "CustomModelAnimation": "Blocks/AirshipCrate/Animations/opening.blockyanim"
-        }
-      }
-    }
-  },
   "ItemSoundSetId": "ISS_Blocks_Wood",
   "FuelQuality": 0,
   "MaxStack": 1,
@@ -51,17 +17,108 @@
         "Type": "Crafting",
         "RequiredTierLevel": 2,
         "Id": "Workbench",
-        "Categories": ["Workbench_Tinkering"]
+        "Categories": [
+          "Workbench_Tinkering"
+        ]
       }
     ],
     "TimeSeconds": 30,
     "Input": [
-      { "ItemId": "Ingredient_Bar_Copper", "Quantity": 100 },
-      { "ItemId": "Wood_Hardwood_Planks", "Quantity": 100 },
-      { "ItemId": "Ingredient_Fabric_Scrap_Linen", "Quantity": 40 },
-      { "ItemId": "Ingredient_Fibre", "Quantity": 20 }
+      {
+        "ItemId": "Ingredient_Bar_Copper",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Wood_Hardwood_Planks",
+        "Quantity": 100
+      },
+      {
+        "ItemId": "Ingredient_Fabric_Scrap_Linen",
+        "Quantity": 40
+      },
+      {
+        "ItemId": "Ingredient_Fibre",
+        "Quantity": 20
+      }
     ]
   },
   "Quality": "Epic",
-  "ItemLevel": 0
+  "ItemLevel": 0,
+  "BlockType": {
+    "Material": "Solid",
+    "DrawType": "Model",
+    "Opacity": "Solid",
+    "Group": "@Tech",
+    "BlockParticleSetId": "Wood",
+    "ParticleColor": "#3f2720",
+    "BlockSoundSetId": "Wood",
+    "CustomModel": "Blocks/AirshipCrate/AirshipCrate.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "BlockTextures/AirshipCrate/Furniture_Village_Crate.png"
+      }
+    ],
+    "InteractionHitboxType": "Chest_Small",
+    "Flags": {
+      "IsUsable": true
+    },
+    "InteractionHint": "airships.block.interact",
+    "State": {
+      "Definitions": {
+        "Default": {},
+        "Opening": {
+          "CustomModelAnimation": "Blocks/AirshipCrate/Animations/opening.blockyanim"
+        }
+      }
+    },
+    "Textures": [
+      {
+        "All": "BlockTextures/AirshipCrate/Furniture_Village_Crate.png"
+      }
+    ],
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "FirstClick",
+            "Click": {
+              "Type": "Parallel",
+              "Interactions": [
+                {
+                  "Interactions": [
+                    {
+                      "Type": "ChangeState",
+                      "UpdateBlockState": true,
+                      "Changes": {
+                        "default": "Opening"
+                      },
+                      "Next": {
+                        "Type": "Simple",
+                        "RunTime": 6,
+                        "Next": {
+                          "Type": "BreakBlock"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Interactions": [
+                    {
+                      "Type": "Simple",
+                      "RunTime": 3,
+                      "Next": {
+                        "Type": "AirshipCrateInteraction"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "HitboxType": "Chest_Small"
+  }
 }

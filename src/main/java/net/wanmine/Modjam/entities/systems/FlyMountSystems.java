@@ -8,6 +8,7 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.HolderSystem;
 import com.hypixel.hytale.component.system.RefChangeSystem;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
+import com.hypixel.hytale.component.system.tick.TickingSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
@@ -15,6 +16,7 @@ import com.hypixel.hytale.protocol.*;
 import com.hypixel.hytale.protocol.packets.camera.SetServerCamera;
 import com.hypixel.hytale.protocol.packets.player.ClientTeleport;
 import com.hypixel.hytale.server.core.asset.type.model.config.Model;
+import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Set;
 
 public final class FlyMountSystems {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     private FlyMountSystems() {
     }
@@ -277,7 +280,6 @@ public final class FlyMountSystems {
     }
 
     public static final class InputSystem extends EntityTickingSystem<EntityStore> {
-        private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
         private final ComponentType<EntityStore, PlayerInput> playerInputComponentType = PlayerInput.getComponentType();
         private final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType = FlyingDriverComponent.getComponentType();
@@ -630,6 +632,58 @@ public final class FlyMountSystems {
         @Override
         public Query<EntityStore> getQuery() {
             return query;
+        }
+    }
+
+    public static class InitialScaleUpSystem extends TickingSystem<EntityStore> {
+
+        private final ComponentType<EntityStore, FlyingEntityComponent> flyingEntityComponent;
+        private final ComponentType<EntityStore, ModelComponent> modelComponent;
+
+        public InitialScaleUpSystem() {
+            this.flyingEntityComponent = FlyingEntityComponent.getComponentType();
+            this.modelComponent = ModelComponent.getComponentType();
+        }
+
+        @Nonnull
+        public Query<EntityStore> getQuery() {
+            return Query.and(
+                    FlyingEntityComponent.getComponentType(),
+                    ModelComponent.getComponentType()
+            );
+        }
+
+        @Override
+        public void tick(float dt, int tickCount, @Nonnull Store<EntityStore> store) {
+            store.forEachChunk(this.getQuery(), ((chunk, commandBuffer) -> {
+                for (int i = 0; i < chunk.size(); i++) {
+                    Ref<EntityStore> entityRef = chunk.getReferenceTo(i);
+                    FlyingEntityComponent flyingEntity = chunk.getComponent(i, this.flyingEntityComponent);
+                    if (flyingEntity != null && flyingEntity.getModelScale() < FlyingEntityComponent.DEFAULT_MODEL_SCALE && !flyingEntity.isReadyToFly()) {
+                        ModelComponent modelComponent = chunk.getComponent(i, this.modelComponent);
+
+                        float currentScale = flyingEntity.getModelScale();
+
+                        if (modelComponent != null) {
+                            ModelAsset modelAsset = ModelAsset.getAssetMap().getAsset(modelComponent.getModel().getModelAssetId());
+                            float newScale = Math.clamp(currentScale + dt * 0.27f, 0.0f, FlyingEntityComponent.DEFAULT_MODEL_SCALE);
+                            flyingEntity.setModelScale(newScale);
+                            if (modelAsset != null) {
+                                if (newScale >= FlyingEntityComponent.DEFAULT_MODEL_SCALE) {
+                                    flyingEntity.setModelScale(FlyingEntityComponent.DEFAULT_MODEL_SCALE);
+                                    flyingEntity.setReadyToFly(true);
+                                    Model updatedModel = Model.createScaledModel(modelAsset, FlyingEntityComponent.DEFAULT_MODEL_SCALE);
+                                    commandBuffer.putComponent(entityRef, this.modelComponent, new ModelComponent(updatedModel));
+                                    commandBuffer.putComponent(entityRef, this.flyingEntityComponent, flyingEntity);
+                                } else {
+                                    Model updatedModel = Model.createScaledModel(modelAsset, newScale);
+                                    commandBuffer.putComponent(entityRef, this.modelComponent, new ModelComponent(updatedModel));
+                                }
+                            }
+                        }
+                    }
+                }
+            }));
         }
     }
 }

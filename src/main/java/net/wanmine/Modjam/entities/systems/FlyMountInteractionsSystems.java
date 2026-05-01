@@ -11,6 +11,8 @@ import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.*;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
+import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.auth.PlayerAuthentication;
 import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
@@ -28,6 +30,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.NotificationUtil;
 import net.wanmine.Modjam.entities.components.FlyingDriverComponent;
 import net.wanmine.Modjam.entities.components.FlyingEntityComponent;
 import net.wanmine.Modjam.utils.AirshipFactory;
@@ -88,6 +91,11 @@ public class FlyMountInteractionsSystems {
                 FlyingEntityComponent flyingEntity = store.getComponent(mountRef, FlyingEntityComponent.getComponentType());
                 if (flyingEntity == null) {
                     LOGGER.atWarning().log("No FlyingEntityComponent on mountRef=%s", mountRef);
+                    return;
+                }
+
+                if (!flyingEntity.isReadyToFly()) {
+                    NotificationUtil.sendNotification(playerRefComponent.getPacketHandler(), Message.raw("Airship"), Message.raw("Airship still not ready!"), NotificationStyle.Warning);
                     return;
                 }
 
@@ -171,6 +179,7 @@ public class FlyMountInteractionsSystems {
             Ref<EntityStore> targetRef = ctx.getTargetEntity();
             BlockPosition targetBlock = ctx.getTargetBlock();
 
+
             Ref<EntityStore> ref = ctx.getEntity();
             Store<EntityStore> store = ref.getStore();
             Player playerComponent = commandBuffer.getComponent(ref, Player.getComponentType());
@@ -204,15 +213,10 @@ public class FlyMountInteractionsSystems {
                 Vector3f baseRot = playerTransform.getRotation().clone();
                 Vector3d cratePosition = new Vector3d(targetBlock.x, targetBlock.y, targetBlock.z);
 
-                AirshipFactory.spawnMount(store, cratePosition, baseRot);
-
-                world.setBlock(vector3i.x, vector3i.y, vector3i.z, "Empty");
+                AirshipFactory.spawnMount(store, cratePosition, baseRot, 0.1f);
             });
 
         }
-
-
-
         @Override
         protected void simulateInteractWithBlock(@NonNullDecl InteractionType interactionType, @NonNullDecl InteractionContext interactionContext, @NullableDecl ItemStack itemStack, @NonNullDecl World world, @NonNullDecl Vector3i vector3i) {
 
