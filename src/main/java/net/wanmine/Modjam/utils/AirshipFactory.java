@@ -64,6 +64,7 @@ public class AirshipFactory {
             return null;
         }
 
+        flyingEntity.setReadyToFly(true);
         return mountRef;
     }
 
@@ -149,7 +150,7 @@ public class AirshipFactory {
             return null;
         }
 
-        Model seatModel = Model.createScaledModel(seatModelAsset, 1.0f);
+        Model seatModel = Model.createScaledModel(seatModelAsset, 2f);
 
         TransformComponent seatTransform = new TransformComponent();
         seatTransform.setPosition(position.clone().add(new Vector3d(0.0, 1.0, 0.0)));
@@ -157,7 +158,7 @@ public class AirshipFactory {
 
         FlyingSeatComponent seatComponent = new FlyingSeatComponent(mountRef)
                 .withPlayerRef(playerRef)
-                .withLocalOffset(new Vector3d(0.0, -0.5, -1.0));
+                .withLocalOffset(new Vector3d(0.0, -0.1, -0.2));
 
         Holder<EntityStore> seatHolder = EntityStore.REGISTRY.newHolder();
         seatHolder.addComponent(TransformComponent.getComponentType(), seatTransform);
@@ -256,18 +257,18 @@ public class AirshipFactory {
             store.removeEntity(seatRef, RemoveReason.REMOVE);
         }
 
+        boolean isCreative = player.getGameMode() == GameMode.Creative;
+
         AnimationUtils.stopAnimation(playerEntityRef, AnimationSlot.Movement, true, store);
 
-        if (player.getGameMode() != GameMode.Creative) {
-            movementManager.getSettings().canFly = false;
-            movementManager.update(playerRef.getPacketHandler());
-        }
-        MovementStates movementStates = movementStatesComponent.getMovementStates().clone();
-        movementStates.flying = false;
-        movementStatesComponent.setMovementStates(movementStates);
+        movementManager.getSettings().canFly = isCreative;
+        movementManager.update(playerRef.getPacketHandler());
+
+        movementStatesComponent.getMovementStates().flying = false;
+        movementStatesComponent.setSentMovementStates(movementStatesComponent.getMovementStates());
+        store.putComponent(playerEntityRef, MovementStatesComponent.getComponentType(), movementStatesComponent);
+        player.applyMovementStates(playerEntityRef, new SavedMovementStates(false), movementStatesComponent.getMovementStates(), store);
 
         player.setMountEntityId(-1);
-
-        AnimationUtils.stopAnimation(mountRef, AnimationSlot.Movement, true, store);
     }
 }

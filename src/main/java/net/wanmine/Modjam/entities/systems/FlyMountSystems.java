@@ -33,6 +33,7 @@ import net.wanmine.Modjam.entities.components.FlyingDriverComponent;
 import net.wanmine.Modjam.entities.components.FlyingEntityComponent;
 import net.wanmine.Modjam.entities.components.attachments.FlyingSeatComponent;
 import com.hypixel.hytale.component.system.RefSystem;
+import net.wanmine.Modjam.ui.AirshipControlsHUD;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,11 +43,39 @@ import java.util.Set;
 public final class FlyMountSystems {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-    private FlyMountSystems() {
+    private static final ComponentType<EntityStore, FlyingEntityComponent> flyingEntityComponentType = FlyingEntityComponent.getComponentType();
+    private static final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType = FlyingDriverComponent.getComponentType();
+    private static final ComponentType<EntityStore, Player> playerComponentType = Player.getComponentType();
+    private static final ComponentType<EntityStore, PlayerRef> playerRefComponentType = PlayerRef.getComponentType();
+    private static final ComponentType<EntityStore, PlayerInput> playerInputComponentType = PlayerInput.getComponentType();
+    private static final ComponentType<EntityStore, ModelComponent> modelComponentType = ModelComponent.getComponentType();
+    private static final ComponentType<EntityStore, NetworkId> networkIdComponentType = NetworkId.getComponentType();
+    private static final ComponentType<EntityStore, FlyingSeatComponent> flyingSeatComponentType = FlyingSeatComponent.getComponentType();
+    private static final ComponentType<EntityStore, TransformComponent> transformComponentType = TransformComponent.getComponentType();
+
+    public FlyMountSystems() {
     }
 
-    private static void applyFlyMountCamera(@Nonnull Ref<EntityStore> playerRef, @Nonnull Ref<EntityStore> flyerRef, @Nonnull Store<EntityStore> store) {
-        PlayerRef player = store.getComponent(playerRef, PlayerRef.getComponentType());
+    private static void applyControlsHUD(@Nonnull Ref<EntityStore> playerEntityRef, @Nonnull Store<EntityStore> store) {
+        PlayerRef playerRef = store.getComponent(playerEntityRef, playerRefComponentType);
+        Player player = store.getComponent(playerEntityRef, playerComponentType);
+        if (playerRef == null || player == null) {
+            return;
+        }
+        player.getHudManager().setCustomHud(playerRef, new AirshipControlsHUD(playerRef));
+    }
+
+    private static void removeControlsHUD(@Nonnull Ref<EntityStore> playerEntityRef, @Nonnull Store<EntityStore> store) {
+        PlayerRef playerRef = store.getComponent(playerEntityRef, playerRefComponentType);
+        Player player = store.getComponent(playerEntityRef, playerComponentType);
+        if (playerRef == null || player == null) {
+            return;
+        }
+        player.getHudManager().resetHud(playerRef);
+    }
+
+    public static void applyFlyMountCamera(@Nonnull Ref<EntityStore> playerRef, @Nonnull Store<EntityStore> store) {
+        PlayerRef player = store.getComponent(playerRef, playerRefComponentType);
         if (player == null) {
             return;
         }
@@ -61,29 +90,28 @@ public final class FlyMountSystems {
         settings.displayCursor = false;
         settings.canMoveType = CanMoveType.Always;
         settings.positionOffset = new Position(0.0f, 5.0f, 0.0f);
-        /*settings.attachedToType = AttachedToType.EntityId;*/
         settings.allowPitchControls = true;
         settings.isFirstPerson = false;
         settings.displayReticle = false;
+        settings.mouseInputTargetType = MouseInputTargetType.Entity;
+        settings.sendMouseMotion = true;
 
-        player.getPacketHandler().write(new SetServerCamera(ClientCameraView.Custom, true, settings));
+        player.getPacketHandler().write(new SetServerCamera(ClientCameraView.Custom, false, settings));
     }
 
-    private static void resetFlyMountCamera(@Nonnull Ref<EntityStore> playerRef, @Nonnull Store<EntityStore> store) {
-        PlayerRef player = store.getComponent(playerRef, PlayerRef.getComponentType());
+    public static void resetFlyMountCamera(@Nonnull Ref<EntityStore> playerRef, @Nonnull Store<EntityStore> store) {
+        PlayerRef player = store.getComponent(playerRef, playerRefComponentType);
         if (player == null) {
             return;
         }
 
-        player.getPacketHandler().writeNoCache(
-                new SetServerCamera(ClientCameraView.Custom, false, null)
-        );
+        player.getPacketHandler().writeNoCache(new SetServerCamera(ClientCameraView.Custom, false, null));
     }
 
     private static void handleFlyingMountedRemoval(@Nonnull Ref<EntityStore> playerRef, @Nonnull CommandBuffer<EntityStore> commandBuffer, @Nonnull FlyingDriverComponent driver) {
         Ref<EntityStore> seatRef = driver.getSeatRef();
         if (seatRef != null && seatRef.isValid()) {
-            FlyingSeatComponent seat = commandBuffer.getComponent(seatRef, FlyingSeatComponent.getComponentType());
+            FlyingSeatComponent seat = commandBuffer.getComponent(seatRef, flyingSeatComponentType);
             if (seat != null && playerRef.equals(seat.getPlayerRef())) {
                 seat.setPlayerRef(null);
             }
@@ -91,12 +119,6 @@ public final class FlyMountSystems {
     }
 
     public static final class SeatFollowFlyerSystem extends EntityTickingSystem<EntityStore> {
-
-        private final ComponentType<EntityStore, FlyingSeatComponent> flyingSeatComponentType =
-                FlyingSeatComponent.getComponentType();
-        private final ComponentType<EntityStore, TransformComponent> transformComponentType =
-                TransformComponent.getComponentType();
-
         private final Query<EntityStore> query = Archetype.of(
                 flyingSeatComponentType,
                 transformComponentType
@@ -160,10 +182,6 @@ public final class FlyMountSystems {
     }
 
     public static final class ValidationSystem extends EntityTickingSystem<EntityStore> {
-
-        private final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType = FlyingDriverComponent.getComponentType();
-        private final ComponentType<EntityStore, Player> playerComponentType = Player.getComponentType();
-
         private final Query<EntityStore> query = Archetype.of(flyingDriverComponentType, playerComponentType);
 
         @Override
@@ -184,7 +202,7 @@ public final class FlyMountSystems {
                 return;
             }
 
-            FlyingSeatComponent seat = store.getComponent(seatRef, FlyingSeatComponent.getComponentType());
+            FlyingSeatComponent seat = store.getComponent(seatRef, flyingSeatComponentType);
             if (seat == null) {
                 clearDriver(playerRef, player, driver, store, commandBuffer);
                 return;
@@ -203,11 +221,12 @@ public final class FlyMountSystems {
         private void clearDriver(@Nonnull Ref<EntityStore> playerRef, @Nonnull Player player, @Nonnull FlyingDriverComponent driver, @Nonnull Store<EntityStore> store, @Nonnull CommandBuffer<EntityStore> commandBuffer) {
             handleFlyingMountedRemoval(playerRef, commandBuffer, driver);
             resetFlyMountCamera(playerRef, store);
+            removeControlsHUD(playerRef, store);
             player.setMountEntityId(0);
             driver.setMoveForward(0f);
             driver.setMoveStrafe(0f);
             driver.setVerticalInput(0f);
-            commandBuffer.removeComponent(playerRef, FlyingDriverComponent.getComponentType());
+            commandBuffer.removeComponent(playerRef, flyingDriverComponentType);
         }
 
         @Nonnull
@@ -219,9 +238,7 @@ public final class FlyMountSystems {
 
     public static final class PlayerMount extends RefChangeSystem<EntityStore, FlyingDriverComponent> {
 
-        private final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType = FlyingDriverComponent.getComponentType();
-        private final ComponentType<EntityStore, PlayerInput> playerInputComponentType = PlayerInput.getComponentType();
-        private final ComponentType<EntityStore, NetworkId> networkIdComponentType = NetworkId.getComponentType();
+
 
         private final Query<EntityStore> query = playerInputComponentType;
 
@@ -240,10 +257,13 @@ public final class FlyMountSystems {
         @Override
         public void onComponentAdded(@Nonnull Ref<EntityStore> ref, @Nonnull FlyingDriverComponent component, @Nonnull Store<EntityStore> store, @Nonnull CommandBuffer<EntityStore> commandBuffer) {
 
+            Player player = commandBuffer.getComponent(ref, playerComponentType);
+            PlayerRef playerRef = commandBuffer.getComponent(ref, playerRefComponentType);
+            MovementManager movementManager = commandBuffer.getComponent(ref, MovementManager.getComponentType());
+            MovementStatesComponent movementStatesComponent = commandBuffer.getComponent(ref, MovementStatesComponent.getComponentType());
             PlayerInput playerInput = commandBuffer.getComponent(ref, playerInputComponentType);
-            if (playerInput == null) {
+            if (player == null || playerRef == null || movementManager == null || movementStatesComponent == null | playerInput == null)
                 return;
-            }
 
             Ref<EntityStore> seatRef = component.getSeatRef();
             if (seatRef != null && seatRef.isValid()) {
@@ -254,9 +274,16 @@ public final class FlyMountSystems {
                 }
             }
 
+            movementManager.getSettings().canFly = true;
+            movementManager.update(playerRef.getPacketHandler());
+            MovementStates newStates = movementStatesComponent.getMovementStates().clone();
+            newStates.flying = false;
+            movementStatesComponent.setSentMovementStates(newStates);
+
             Ref<EntityStore> flyerRef = component.getFlyerRef();
             if (flyerRef != null && flyerRef.isValid()) {
-                applyFlyMountCamera(ref, flyerRef, store);
+                applyFlyMountCamera(ref, store);
+                applyControlsHUD(ref, store);
             }
 
             component.markNetworkOutdated();
@@ -276,14 +303,11 @@ public final class FlyMountSystems {
             }
 
             resetFlyMountCamera(ref, store);
+            removeControlsHUD(ref, store);
         }
     }
 
     public static final class InputSystem extends EntityTickingSystem<EntityStore> {
-
-        private final ComponentType<EntityStore, PlayerInput> playerInputComponentType = PlayerInput.getComponentType();
-        private final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType = FlyingDriverComponent.getComponentType();
-
         private final Query<EntityStore> query = Archetype.of(playerInputComponentType, flyingDriverComponentType);
 
         private final Set<Dependency<EntityStore>> dependencies = Set.of(new SystemDependency<>(Order.BEFORE, PlayerSystems.ProcessPlayerInput.class));
@@ -293,7 +317,7 @@ public final class FlyMountSystems {
 
             FlyingDriverComponent driver = archetypeChunk.getComponent(index, flyingDriverComponentType);
             PlayerInput playerInput = archetypeChunk.getComponent(index, playerInputComponentType);
-            Player player = archetypeChunk.getComponent(index, Player.getComponentType());
+            Player player = archetypeChunk.getComponent(index, playerComponentType);
 
             if (driver == null || playerInput == null || player == null) {
                 return;
@@ -391,14 +415,6 @@ public final class FlyMountSystems {
     }
 
     public static final class SyncSystem extends EntityTickingSystem<EntityStore> {
-
-        private final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType =
-                FlyingDriverComponent.getComponentType();
-        private final ComponentType<EntityStore, TransformComponent> transformComponentType =
-                TransformComponent.getComponentType();
-        private final ComponentType<EntityStore, Player> playerComponentType =
-                Player.getComponentType();
-
         private final Query<EntityStore> query = Archetype.of(
                 flyingDriverComponentType,
                 transformComponentType,
@@ -419,7 +435,7 @@ public final class FlyMountSystems {
             FlyingDriverComponent driver = archetypeChunk.getComponent(index, flyingDriverComponentType);
             TransformComponent playerTransform = archetypeChunk.getComponent(index, transformComponentType);
             Player player = archetypeChunk.getComponent(index, playerComponentType);
-            PlayerRef playerRef = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
+            PlayerRef playerRef = archetypeChunk.getComponent(index, playerRefComponentType);
             MovementManager movementManager = archetypeChunk.getComponent(index, MovementManager.getComponentType());
             MovementStatesComponent movementStatesComponent = archetypeChunk.getComponent(index, MovementStatesComponent.getComponentType());
 
@@ -439,7 +455,7 @@ public final class FlyMountSystems {
 
             TransformComponent seatTransform = store.getComponent(seatRef, transformComponentType);
             TransformComponent flyerTransform = store.getComponent(flyerRef, transformComponentType);
-            NetworkId seatNetworkId = store.getComponent(seatRef, NetworkId.getComponentType());
+            NetworkId seatNetworkId = store.getComponent(seatRef, networkIdComponentType);
 
             if (seatTransform == null || flyerTransform == null || seatNetworkId == null) {
                 return;
@@ -460,18 +476,6 @@ public final class FlyMountSystems {
             playerTransform.setPosition(targetPos);
             playerTransform.setRotation(targetRot);
             playerTransform.markChunkDirty(store);
-
-            boolean currentFlyState = movementManager.getSettings().canFly;
-            if (!currentFlyState) {
-                movementManager.getSettings().canFly = true;
-                movementManager.update(playerRef.getPacketHandler());
-            }
-
-            MovementStates movementStates = movementStatesComponent.getMovementStates().clone();
-            if (!movementStates.flying) {
-                movementStates.flying = true;
-                movementStatesComponent.setMovementStates(movementStates);
-            }
 
             if (player.getReference() != null) {
                 AnimationUtils.playAnimation(player.getReference(), AnimationSlot.Movement, null, "Sit", true, store);
@@ -508,9 +512,6 @@ public final class FlyMountSystems {
     }
 
     public static final class RemoveDriver extends RefSystem<EntityStore> {
-
-        private final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType = FlyingDriverComponent.getComponentType();
-
         @Override
         public void onEntityAdded(@Nonnull Ref<EntityStore> ref, @Nonnull AddReason reason, @Nonnull Store<EntityStore> store, @Nonnull CommandBuffer<EntityStore> commandBuffer) {
         }
@@ -524,6 +525,7 @@ public final class FlyMountSystems {
             }
 
             resetFlyMountCamera(ref, store);
+            removeControlsHUD(ref, store);
         }
 
         @Nonnull
@@ -534,10 +536,6 @@ public final class FlyMountSystems {
     }
 
     public static final class RemoveSeat extends RefSystem<EntityStore> {
-
-        private final ComponentType<EntityStore, FlyingSeatComponent> flyingSeatComponentType = FlyingSeatComponent.getComponentType();
-        private final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType = FlyingDriverComponent.getComponentType();
-
         @Override
         public void onEntityAdded(@Nonnull Ref<EntityStore> ref, @Nonnull AddReason reason, @Nonnull Store<EntityStore> store, @Nonnull CommandBuffer<EntityStore> commandBuffer) {
         }
@@ -555,6 +553,7 @@ public final class FlyMountSystems {
                 FlyingDriverComponent driver = commandBuffer.getComponent(playerRef, flyingDriverComponentType);
                 if (driver != null) {
                     resetFlyMountCamera(playerRef, store);
+                    removeControlsHUD(ref, store);
                     commandBuffer.removeComponent(playerRef, flyingDriverComponentType);
                 }
             }
@@ -568,9 +567,7 @@ public final class FlyMountSystems {
     }
 
     public static class AddNetworkIdToFlyingEntitySystem extends HolderSystem<EntityStore> {
-        private final ComponentType<EntityStore, FlyingEntityComponent> myEntityComponentType = FlyingEntityComponent.getComponentType();
-        private final ComponentType<EntityStore, NetworkId> networkIdComponentType = NetworkId.getComponentType();
-        private final Query<EntityStore> query = Query.and(this.myEntityComponentType, Query.not(this.networkIdComponentType));
+        private final Query<EntityStore> query = Query.and(flyingEntityComponentType, Query.not(networkIdComponentType));
 
         @Override
         public void onEntityAdd(@Nonnull Holder<EntityStore> holder, @Nonnull AddReason reason, @Nonnull Store<EntityStore> store) {
@@ -589,10 +586,6 @@ public final class FlyMountSystems {
     }
 
     public static final class RemovalSystem extends EntityTickingSystem<EntityStore> {
-
-        private final ComponentType<EntityStore, FlyingSeatComponent> flyingSeatComponentType = FlyingSeatComponent.getComponentType();
-        private final ComponentType<EntityStore, FlyingDriverComponent> flyingDriverComponentType = FlyingDriverComponent.getComponentType();
-
         private final Query<EntityStore> query = Archetype.of(flyingSeatComponentType);
 
         @Override
@@ -624,6 +617,7 @@ public final class FlyMountSystems {
             if (!seatRef.equals(driverSeatRef) || seatFlyerRef == null || !seatFlyerRef.equals(driverFlyerRef)) {
                 seat.setPlayerRef(null);
                 resetFlyMountCamera(playerRef, store);
+                removeControlsHUD(playerRef, store);
                 commandBuffer.removeComponent(playerRef, flyingDriverComponentType);
             }
         }
@@ -636,20 +630,13 @@ public final class FlyMountSystems {
     }
 
     public static class InitialScaleUpSystem extends TickingSystem<EntityStore> {
-
-        private final ComponentType<EntityStore, FlyingEntityComponent> flyingEntityComponent;
-        private final ComponentType<EntityStore, ModelComponent> modelComponent;
-
-        public InitialScaleUpSystem() {
-            this.flyingEntityComponent = FlyingEntityComponent.getComponentType();
-            this.modelComponent = ModelComponent.getComponentType();
-        }
+        public InitialScaleUpSystem() {}
 
         @Nonnull
         public Query<EntityStore> getQuery() {
             return Query.and(
-                    FlyingEntityComponent.getComponentType(),
-                    ModelComponent.getComponentType()
+                    flyingEntityComponentType,
+                    modelComponentType
             );
         }
 
@@ -658,9 +645,9 @@ public final class FlyMountSystems {
             store.forEachChunk(this.getQuery(), ((chunk, commandBuffer) -> {
                 for (int i = 0; i < chunk.size(); i++) {
                     Ref<EntityStore> entityRef = chunk.getReferenceTo(i);
-                    FlyingEntityComponent flyingEntity = chunk.getComponent(i, this.flyingEntityComponent);
+                    FlyingEntityComponent flyingEntity = chunk.getComponent(i, flyingEntityComponentType);
                     if (flyingEntity != null && flyingEntity.getModelScale() < FlyingEntityComponent.DEFAULT_MODEL_SCALE && !flyingEntity.isReadyToFly()) {
-                        ModelComponent modelComponent = chunk.getComponent(i, this.modelComponent);
+                        ModelComponent modelComponent = chunk.getComponent(i, modelComponentType);
 
                         float currentScale = flyingEntity.getModelScale();
 
@@ -673,11 +660,11 @@ public final class FlyMountSystems {
                                     flyingEntity.setModelScale(FlyingEntityComponent.DEFAULT_MODEL_SCALE);
                                     flyingEntity.setReadyToFly(true);
                                     Model updatedModel = Model.createScaledModel(modelAsset, FlyingEntityComponent.DEFAULT_MODEL_SCALE);
-                                    commandBuffer.putComponent(entityRef, this.modelComponent, new ModelComponent(updatedModel));
-                                    commandBuffer.putComponent(entityRef, this.flyingEntityComponent, flyingEntity);
+                                    commandBuffer.putComponent(entityRef, modelComponentType, new ModelComponent(updatedModel));
+                                    commandBuffer.putComponent(entityRef, flyingEntityComponentType, flyingEntity);
                                 } else {
                                     Model updatedModel = Model.createScaledModel(modelAsset, newScale);
-                                    commandBuffer.putComponent(entityRef, this.modelComponent, new ModelComponent(updatedModel));
+                                    commandBuffer.putComponent(entityRef, modelComponentType, new ModelComponent(updatedModel));
                                 }
                             }
                         }

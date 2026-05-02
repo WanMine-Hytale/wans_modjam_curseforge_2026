@@ -18,10 +18,10 @@ import net.wanmine.Modjam.entities.systems.FlyMountSystems;
 import net.wanmine.Modjam.entities.systems.VorthraxDayNightSystem;
 
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import net.wanmine.Modjam.managers.BossBarManager;
-import net.wanmine.Modjam.systems.PlayerRangeTickSystem;
-import net.wanmine.Modjam.systems.VorthraxDamageSystem;
-import net.wanmine.Modjam.systems.VorthraxTrackerSystem;
+import net.wanmine.Modjam.entities.managers.BossBarManager;
+import net.wanmine.Modjam.entities.systems.PlayerRangeTickSystem;
+import net.wanmine.Modjam.entities.systems.VorthraxDamageSystem;
+import net.wanmine.Modjam.entities.systems.VorthraxTrackerSystem;
 
 import javax.annotation.Nonnull;
 
@@ -42,7 +42,9 @@ public class SkyAdventuresPlugin extends JavaPlugin {
         LOGGER.atInfo().log("Plugin Loaded: %s (version: %s)", this.getName(), this.getManifest().getVersion().toString());
     }
 
-    private PacketFilter inboundFilter;
+    private PacketFilter dismountInboundFilter;
+    private PacketFilter keybindsInboundFilter;
+
     public BossBarManager getBossBarManager() { return bossBarManager; }
     public static SkyAdventuresPlugin getInstance() { return instance; }
 
@@ -77,7 +79,8 @@ public class SkyAdventuresPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new FlyMountSystems.AddNetworkIdToFlyingEntitySystem());
         this.getEntityStoreRegistry().registerSystem(new FlyMountSystems.InitialScaleUpSystem());
 
-        inboundFilter = PacketAdapters.registerInbound(new FlyMountInteractionsSystems.DismountPacketWatcher());
+        dismountInboundFilter = PacketAdapters.registerInbound(new FlyMountInteractionsSystems.DismountPacketWatcher());
+        keybindsInboundFilter = PacketAdapters.registerInbound(new FlyMountInteractionsSystems.AirshipKeybindsHandler());
 
         if (NPCEntity.getComponentType() == null) {
             LOGGER.atWarning().log("MODERROR: NPCEntity component type not found!");
@@ -103,8 +106,11 @@ public class SkyAdventuresPlugin extends JavaPlugin {
             bossBarManager.clearAll();
         }
         LOGGER.atInfo().log("Shutdown %s", this.getName());
-        if (inboundFilter != null) {
-            PacketAdapters.deregisterInbound(inboundFilter);
+        if (dismountInboundFilter != null) {
+            PacketAdapters.deregisterInbound(dismountInboundFilter);
+        }
+        if (keybindsInboundFilter != null) {
+            PacketAdapters.deregisterInbound(keybindsInboundFilter);
         }
     }
 }

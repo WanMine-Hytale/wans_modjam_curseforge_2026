@@ -1,0 +1,134 @@
+$C = "../Common.ui";
+
+@ActionLabelStyle = LabelStyle(
+  ...$C.@PrimaryButtonLabelStyle,
+  RenderUppercase: false,
+  FontSize: 14
+);
+
+@MultipleControlRow = Group {
+  LayoutMode: Right;
+  Anchor: (Top: 15);
+
+  Label #Label {
+    Text: @LabelText;
+    Style: @ActionLabelStyle;
+  }
+
+  Group {
+    Anchor: (Width: 10);
+  }
+
+  Group #Content { LayoutMode: Center; }
+};
+
+@ControlRow = Group {
+  LayoutMode: Right;
+  Anchor: (Top: 15);
+
+  Label #Label { Text: @LabelText; Style: @ActionLabelStyle; }
+
+  Group {
+    Anchor: (Width: 10);
+  }
+
+  Group #Content {
+    LayoutMode: Center;
+    ActionButton {
+      Disabled: true;
+      LayoutMode: Right;
+      KeyBindingLabel: @Keybind;
+    }
+  }
+
+};
+
+Group {
+  Anchor: (Bottom: 165);
+  LayoutMode: Bottom;
+  Label {
+    Text: "Double Space first time to start flying up";
+    Style: @ActionLabelStyle;
+  }
+}
+
+Group #Container {
+  Anchor: (Right: 50, Bottom: 200);
+  LayoutMode: Right;
+
+
+  Group {
+    LayoutMode: Bottom;
+
+    @ControlRow {
+      @LabelText = "Dismount";
+      @Keybind = "F";
+    }
+
+    @MultipleControlRow {
+      @LabelText =  "First Person / Airship Camera";
+      #Content {
+        ActionButton {
+          Disabled: true;
+          LayoutMode: Right;
+          KeyBindingLabel: "9";
+        }
+      }
+    }
+
+    @MultipleControlRow {
+      @LabelText =  "Movement";
+      #Content {
+        ActionButton {
+          Disabled: true;
+          LayoutMode: Right;
+          KeyBindingLabel: "W";
+        }
+
+        Group {
+          Anchor: (Width: 10);
+        }
+
+        ActionButton {
+          Disabled: true;
+          LayoutMode: Right;
+          KeyBindingLabel: "A";
+        }
+
+        Group {
+          Anchor: (Width: 10);
+        }
+
+        ActionButton {
+          Disabled: true;
+          LayoutMode: Right;
+          KeyBindingLabel: "S";
+        }
+
+        Group {
+          Anchor: (Width: 10);
+        }
+
+        ActionButton {
+          Disabled: true;
+          LayoutMode: Right;
+          KeyBindingLabel: "D";
+        }
+      }
+    }
+
+    @ControlRow {
+      @LabelText = "Up";
+      @Keybind = "Space";
+    }
+
+    @ControlRow {
+      @LabelText = "Down";
+      @Keybind = "CTRL";
+    }
+
+
+
+
+  }
+}

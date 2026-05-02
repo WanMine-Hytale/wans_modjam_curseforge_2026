@@ -7,8 +7,16 @@ import com.hypixel.hytale.component.dependency.SystemDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.math.vector.Vector3d;
+import com.hypixel.hytale.protocol.AnimationSlot;
+import com.hypixel.hytale.protocol.Opacity;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.entity.AnimationUtils;
+import com.hypixel.hytale.server.core.modules.collision.WorldUtil;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.TargetUtil;
 import net.wanmine.Modjam.entities.components.*;
 
 import javax.annotation.Nonnull;
@@ -31,6 +39,8 @@ public class FlyMountMovementSystem extends EntityTickingSystem<EntityStore> {
 
     private static final float VELOCITY_MAX = 5.0f;
 
+    private static final double GROUND_OFFSET = 2.0;
+
     private final Set<Dependency<EntityStore>> dependencies = Set.of(
             new SystemDependency<>(Order.AFTER, FlyMountSystems.InputSystem.class)
     );
@@ -40,6 +50,35 @@ public class FlyMountMovementSystem extends EntityTickingSystem<EntityStore> {
             TransformComponent.getComponentType()
     );
 
+    private void bringToTheGround(float dt, TransformComponent transform, World world, Store<EntityStore> store) {
+        Vector3d location = transform.getPosition();
+
+        Vector3d groundHit = TargetUtil.getTargetLocation(
+                world,
+                blockId -> {
+                    if (blockId == BlockType.EMPTY_ID) return false;
+                    BlockType type = BlockType.getAssetMap().getAsset(blockId);
+                    return type != null && type.getOpacity() != Opacity.Transparent;
+                },
+                location.x, location.y + 1.0, location.z,
+                0, -1, 0,
+                256.0
+        );
+
+
+        if (groundHit != null) {
+            double currentY = location.getY();
+            double landingY = groundHit.getY() + GROUND_OFFSET;
+
+            if (currentY > landingY + 0.05) {
+                float distanceToGround = (float)(currentY - landingY);
+                float descentSpeed = Math.min(2.0f, distanceToGround * 0.5f);
+                transform.setPosition(transform.getPosition().clone().add(0, -descentSpeed * dt, 0));
+                transform.markChunkDirty(store);
+            }
+        }
+    }
+
     @Override
     public void tick(float dt,
                      int index,
@@ -47,15 +86,21 @@ public class FlyMountMovementSystem extends EntityTickingSystem<EntityStore> {
                      @Nonnull Store<EntityStore> chunkStore,
                      @Nonnull CommandBuffer<EntityStore> cb) {
 
+        World world = chunkStore.getExternalData().getWorld();
+        Store<EntityStore> store = world.getEntityStore().getStore();
+
+        Ref<EntityStore> flyingEntityRef = chunk.getReferenceTo(index);
+
         FlyingEntityComponent flying = chunk.getComponent(index, FlyingEntityComponent.getComponentType());
         TransformComponent transform = chunk.getComponent(index, TransformComponent.getComponentType());
 
         if (flying == null || transform == null) return;
 
         Ref<EntityStore> driverRef = flying.getDriver();
-        if (driverRef == null || !driverRef.isValid() || !flying.hasDriver()) return;
-
-        Store<EntityStore> store = chunkStore.getExternalData().getWorld().getEntityStore().getStore();
+        if (driverRef == null || !driverRef.isValid() || !flying.hasDriver()) {
+            bringToTheGround(dt, transform, world, store);
+            return;
+        }
         FlyingDriverComponent driver = store.getComponent(driverRef, FlyingDriverComponent.getComponentType());
         if (driver == null) return;
 
@@ -84,6 +129,21 @@ public class FlyMountMovementSystem extends EntityTickingSystem<EntityStore> {
         flying.velocity.x *= Math.max(0.0, 1.0 - DRAG * dt);
         flying.velocity.z *= Math.max(0.0, 1.0 - DRAG * dt);
         flying.velocity.y *= Math.max(0.0, 1.0 - VERTICAL_DRAG * dt);
+
+        float turnInput = Math.max(-1.0f, Math.min(1.0f, moveStrafe / VELOCITY_MAX));
+        String wheelAnimation;
+        if (Math.abs(turnInput) > 0.01f) {
+            wheelAnimation = turnInput < 0 ? "WheelLeft" : "WheelRight";
+        } else {
+            wheelAnimation = "";
+        }
+
+        if (!wheelAnimation.equals(flying.lastWheelAnimation)) {
+            flying.lastWheelAnimation = wheelAnimation;
+            if (!wheelAnimation.isEmpty()) {
+                AnimationUtils.playAnimation(flyingEntityRef, AnimationSlot.Movement, null, wheelAnimation, true, store);
+            }
+        }
 
         transform.getRotation().setYaw(yaw);
         transform.getRotation().setPitch(flying.smoothVisualPitch);

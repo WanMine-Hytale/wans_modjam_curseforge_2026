@@ -9,17 +9,21 @@ import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.*;
+import com.hypixel.hytale.protocol.packets.interaction.CancelInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
+import com.hypixel.hytale.protocol.packets.inventory.SetActiveSlot;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.auth.PlayerAuthentication;
-import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.io.adapter.PacketWatcher;
+import com.hypixel.hytale.server.core.io.adapter.PlayerPacketFilter;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
@@ -39,12 +43,15 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class FlyMountInteractionsSystems {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     public static class MountInteraction extends SimpleInstantInteraction {
-        private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
         public MountInteraction() {
             LOGGER.atInfo().log("MountInteraction Registered");
@@ -73,17 +80,20 @@ public class FlyMountInteractionsSystems {
             PlayerRef playerRefComponent = commandBuffer.getComponent(playerRef, PlayerRef.getComponentType());
             TransformComponent mountTransform = commandBuffer.getComponent(mountRef, TransformComponent.getComponentType());
 
+            MovementStatesComponent movementStates = commandBuffer.getComponent(playerRef, MovementStatesComponent.getComponentType());
+
             if (player == null) { LOGGER.atWarning().log("No Player component on playerRef=%s", playerRef); return; }
             if (playerRefComponent == null) { LOGGER.atWarning().log("No PlayerRef component on playerRef=%s", playerRef); return; }
             if (mountTransform == null) { LOGGER.atWarning().log("No TransformComponent on mountRef=%s", mountRef); return; }
+            if (movementStates == null) { LOGGER.atWarning().log("No MovementStatesComponent on mountRef=%s", mountRef); return; }
+
+
 
             World world = player.getWorld();
             if (world == null) {
                 LOGGER.atWarning().log("Player has no world");
                 return;
             }
-
-            LOGGER.atInfo().log("Scheduling mount/dismount on world thread | player=%s mount=%s", playerRef, mountRef);
 
             world.execute(() -> {
                 Store<EntityStore> store = world.getEntityStore().getStore();
@@ -102,23 +112,31 @@ public class FlyMountInteractionsSystems {
                 Ref<EntityStore> currentDriver = flyingEntity.getDriver();
                 boolean isDriver = playerRef.equals(currentDriver);
 
-                LOGGER.atInfo().log("Mount state | hasDriver=%s currentDriver=%s isDriver=%s",
-                        flyingEntity.hasDriver(), currentDriver, isDriver);
-                if (isDriver) {
-                    LOGGER.atInfo().log("Already the driver!");
+                if (movementStates.getMovementStates().crouching && !isDriver) {
+                    AirshipFactory.destroyMount(store, mountRef);
+                    Vector3i position = mountTransform.getPosition().toVector3i();
+                    world.setBlock(position.x, position.y, position.z, "Airship_Crate");
                 } else {
-                    if (flyingEntity.hasDriver()) {
-                        LOGGER.atInfo().log("Mount=%s already occupied by driver=%s, ignoring", mountRef, currentDriver);
-                        return;
+                    LOGGER.atInfo().log("Mount state | hasDriver=%s currentDriver=%s isDriver=%s",
+                            flyingEntity.hasDriver(), currentDriver, isDriver);
+                    if (isDriver) {
+                        NotificationUtil.sendNotification(playerRefComponent.getPacketHandler(), Message.raw("Airship"), Message.raw("Airship has already a driver!"), NotificationStyle.Warning);
+                    } else {
+                        if (flyingEntity.hasDriver()) {
+                            LOGGER.atInfo().log("Mount=%s already occupied by driver=%s, ignoring", mountRef, currentDriver);
+                            return;
+                        }
+
+                        Vector3d mountPos = mountTransform.getPosition().clone();
+                        Vector3f mountRot = mountTransform.getRotation().clone();
+
+                        LOGGER.atInfo().log("Mounting player=%s on mount=%s | pos=%s rot=%s", playerRef, mountRef, mountPos, mountRot);
+                        AirshipFactory.mountPlayer(store, mountRef, playerRef, mountPos, mountRot);
+                        LOGGER.atInfo().log("Mount complete");
                     }
-
-                    Vector3d mountPos = mountTransform.getPosition().clone();
-                    Vector3f mountRot = mountTransform.getRotation().clone();
-
-                    LOGGER.atInfo().log("Mounting player=%s on mount=%s | pos=%s rot=%s", playerRef, mountRef, mountPos, mountRot);
-                    AirshipFactory.mountPlayer(store, mountRef, playerRef, mountPos, mountRot);
-                    LOGGER.atInfo().log("Mount complete");
                 }
+
+
             });
         }
 
@@ -128,7 +146,6 @@ public class FlyMountInteractionsSystems {
     }
 
     public static class DismountPacketWatcher implements PacketWatcher {
-
         @Override
         public void accept(PacketHandler packetHandler, Packet packet) {
             if (packet.getId() != 290) {
@@ -159,8 +176,94 @@ public class FlyMountInteractionsSystems {
         }
     }
 
+
+    public static class AirshipKeybindsHandler implements PlayerPacketFilter {
+
+        @FunctionalInterface
+        interface HotbarAction {
+            void execute(PlayerRef playerRef, Ref<EntityStore> entityRef, Store<EntityStore> store, FlyingDriverComponent driver);
+        }
+
+        private static final Map<Integer, HotbarAction> ACTIONS = Map.of(
+                8, (_, entityRef,store, driver) -> {
+                    if (driver.getActiveCamera() == 0) {
+                        FlyMountSystems.resetFlyMountCamera(entityRef, store);
+                        driver.setActiveCamera(1);
+                    } else {
+                        FlyMountSystems.applyFlyMountCamera(entityRef, store);
+                        driver.setActiveCamera(0);
+                    }
+                }
+        );
+
+        private void handleKeyTrigger(PlayerRef playerRef, Ref<EntityStore> entityRef, int originalSlot, int chainId, ForkedChainId forkedId, HotbarAction action) {
+            Store<EntityStore> store = entityRef.getStore();
+            store.getExternalData().getWorld().execute(() -> {
+                Player playerComponent = store.getComponent(entityRef, Player.getComponentType());
+                InventoryComponent.Hotbar playerHotbar = store.getComponent(entityRef, InventoryComponent.Hotbar.getComponentType());
+                FlyingDriverComponent driver = store.getComponent(entityRef, FlyingDriverComponent.getComponentType());
+
+                if (playerComponent == null || playerHotbar == null || driver == null) return;
+
+                playerRef.getPacketHandler().writeNoCache(new CancelInteractionChain(chainId, forkedId));
+                playerHotbar.setActiveSlot((byte) originalSlot);
+                playerRef.getPacketHandler().writeNoCache(new SetActiveSlot(
+                        InventoryComponent.HOTBAR_SECTION_ID, originalSlot
+                ));
+
+                action.execute(playerRef, entityRef, store, driver);
+            });
+        }
+
+        @Override
+        public boolean test(PlayerRef playerRef, Packet packet) {
+            if (!(packet instanceof SyncInteractionChains syncPacket)) return false;
+
+            SyncInteractionChain abilityChain = null;
+            HotbarAction action = null;
+            List<SyncInteractionChain> keep = new ArrayList<>();
+
+            for (SyncInteractionChain chain : syncPacket.updates) {
+                HotbarAction candidate = ACTIONS.get(chain.data != null ? chain.data.targetSlot : -1);
+                if (candidate != null
+                        && chain.interactionType == InteractionType.SwapFrom
+                        && chain.initial
+                        && abilityChain == null) {
+                    abilityChain = chain;
+                    action = candidate;
+                } else {
+                    keep.add(chain);
+                }
+            }
+
+            if (abilityChain == null) return false;
+
+            final SyncInteractionChain finalChain = abilityChain;
+            final HotbarAction finalAction = action;
+
+            Ref<EntityStore> entityRef = playerRef.getReference();
+            if (entityRef == null || !entityRef.isValid()) return false;
+
+            Store<EntityStore> store = entityRef.getStore();
+            World world = store.getExternalData().getWorld();
+
+            world.execute(() -> {
+                FlyingDriverComponent driver = store.getComponent(entityRef, FlyingDriverComponent.getComponentType());
+                if (driver == null) return;
+
+                handleKeyTrigger(playerRef, entityRef, finalChain.activeHotbarSlot, finalChain.chainId, finalChain.forkedId, finalAction);
+            });
+
+            if (!keep.isEmpty()) {
+                syncPacket.updates = keep.toArray(new SyncInteractionChain[0]);
+            }
+
+            return false;
+        }
+    }
+
+
     public static class AirshipCrateInteraction extends SimpleBlockInteraction {
-        private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
         public static final BuilderCodec<FlyMountInteractionsSystems.AirshipCrateInteraction> CODEC = BuilderCodec.builder(
                 FlyMountInteractionsSystems.AirshipCrateInteraction.class, FlyMountInteractionsSystems.AirshipCrateInteraction::new, SimpleBlockInteraction.CODEC

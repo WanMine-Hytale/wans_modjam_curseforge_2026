@@ -42,6 +42,9 @@ public class FlyingDriverComponent implements Component<EntityStore> {
         return flyerRef;
     }
 
+    private int activeCamera = 0;
+
+
     private Vector3f attachmentOffset = new Vector3f(0f, 0f, 0f);
     private MountController controllerType = MountController.Minecart;
     private boolean networkOutdated = true;
@@ -206,5 +209,13 @@ public class FlyingDriverComponent implements Component<EntityStore> {
 
     public float getHeadRoll() {
         return headRoll;
+    }
+
+    public int getActiveCamera() {
+        return activeCamera;
+    }
+
+    public void setActiveCamera(int activeCamera) {
+        this.activeCamera = activeCamera;
     }
 }

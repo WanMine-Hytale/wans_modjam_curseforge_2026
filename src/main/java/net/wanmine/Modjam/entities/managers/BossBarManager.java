@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.managers;
+package net.wanmine.Modjam.entities.managers;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;

@@ -58,7 +58,7 @@
         "Texture": "BlockTextures/AirshipCrate/Furniture_Village_Crate.png"
       }
     ],
-    "InteractionHitboxType": "Chest_Small",
+    "InteractionHitboxType": "Full_Block",
     "Flags": {
       "IsUsable": true
     },
@@ -96,9 +96,10 @@
                         "Type": "Simple",
                         "RunTime": 6,
                         "Next": {
-                          "Type": "BreakBlock"
+                          "Type": "DestroyBlock"
                         }
-                      }
+                      },
+                      "UseLatestTarget": true
                     }
                   ]
                 },
@@ -114,11 +115,22 @@
                   ]
                 }
               ]
+            },
+            "Rules": {
+              "Blocking": [
+                "Use"
+              ]
             }
           }
         ]
       }
     },
-    "HitboxType": "Chest_Small"
+    "HitboxType": "Full_Block",
+    "SupportDropType": "Break",
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Woods"
+      }
+    }
   }
 }

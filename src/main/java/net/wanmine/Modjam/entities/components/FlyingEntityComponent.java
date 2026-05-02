@@ -1,5 +1,6 @@
 package net.wanmine.Modjam.entities.components;
 
+import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
@@ -65,6 +66,11 @@ public class FlyingEntityComponent implements Component<EntityStore> {
     @Nonnull
     public static final BuilderCodec<FlyingEntityComponent> CODEC = BuilderCodec
             .builder(FlyingEntityComponent.class, FlyingEntityComponent::new)
+            .append(
+                    new KeyedCodec<>("IsReadyToFly", BuilderCodec.BOOLEAN),
+                    (comp, value) -> comp.readyToFly = value,
+                    comp -> comp.readyToFly
+            ).add()
             .build();
     //endregion
 
@@ -211,6 +217,7 @@ public class FlyingEntityComponent implements Component<EntityStore> {
         cloned.seats.putAll(this.seats);
         cloned.driver = this.driver;
         cloned.driverSeat = this.driverSeat;
+        cloned.readyToFly = this.readyToFly;
         return cloned;
     }
 
