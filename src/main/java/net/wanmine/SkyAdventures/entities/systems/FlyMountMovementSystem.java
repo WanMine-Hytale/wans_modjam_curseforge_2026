@@ -140,7 +140,7 @@ public class FlyMountMovementSystem extends EntityTickingSystem<EntityStore> {
         if (!wheelAnimation.equals(flying.lastWheelAnimation)) {
             flying.lastWheelAnimation = wheelAnimation;
             if (!wheelAnimation.isEmpty()) {
-                AnimationUtils.playAnimation(flyingEntityRef, AnimationSlot.Movement, null, wheelAnimation, true, store);
+                AnimationUtils.playAnimation(flyingEntityRef, AnimationSlot.Action, null, wheelAnimation, true, store);
             }
         }
 

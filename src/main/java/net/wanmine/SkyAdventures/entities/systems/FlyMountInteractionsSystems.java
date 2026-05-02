@@ -15,6 +15,7 @@ import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
 import com.hypixel.hytale.protocol.packets.inventory.SetActiveSlot;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.auth.PlayerAuthentication;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -35,6 +36,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.server.core.util.TargetUtil;
 import net.wanmine.SkyAdventures.entities.components.FlyingDriverComponent;
 import net.wanmine.SkyAdventures.entities.components.FlyingEntityComponent;
 import net.wanmine.SkyAdventures.utils.AirshipFactory;
@@ -115,10 +117,25 @@ public class FlyMountInteractionsSystems {
                 if (movementStates.getMovementStates().crouching && !isDriver) {
                     AirshipFactory.destroyMount(store, mountRef);
                     Vector3i position = mountTransform.getPosition().toVector3i();
-                    world.setBlock(position.x, position.y, position.z, "Airship_Crate");
+
+                    Vector3d groundHit = TargetUtil.getTargetLocation(
+                            world,
+                            blockId -> {
+                                if (blockId == com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType.EMPTY_ID) return false;
+                                com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType type = BlockType.getAssetMap().getAsset(blockId);
+                                return type != null && type.getOpacity() != Opacity.Transparent;
+                            },
+                            position.x, position.y, position.z,
+                            0, -1, 0,
+                            256.0
+                    );
+                    if (groundHit != null) {
+                        world.setBlock((int) groundHit.x, (int) groundHit.y, (int) groundHit.z, "Airship_Crate");
+                    } else {
+                        world.setBlock(position.x, position.y, position.z, "Airship_Crate");
+                    }
+
                 } else {
-                    LOGGER.atInfo().log("Mount state | hasDriver=%s currentDriver=%s isDriver=%s",
-                            flyingEntity.hasDriver(), currentDriver, isDriver);
                     if (isDriver) {
                         NotificationUtil.sendNotification(playerRefComponent.getPacketHandler(), Message.raw("Airship"), Message.raw("Airship has already a driver!"), NotificationStyle.Warning);
                     } else {
@@ -126,13 +143,9 @@ public class FlyMountInteractionsSystems {
                             LOGGER.atInfo().log("Mount=%s already occupied by driver=%s, ignoring", mountRef, currentDriver);
                             return;
                         }
-
                         Vector3d mountPos = mountTransform.getPosition().clone();
                         Vector3f mountRot = mountTransform.getRotation().clone();
-
-                        LOGGER.atInfo().log("Mounting player=%s on mount=%s | pos=%s rot=%s", playerRef, mountRef, mountPos, mountRot);
                         AirshipFactory.mountPlayer(store, mountRef, playerRef, mountPos, mountRot);
-                        LOGGER.atInfo().log("Mount complete");
                     }
                 }
 
@@ -314,6 +327,7 @@ public class FlyMountInteractionsSystems {
                 }
 
                 Vector3f baseRot = playerTransform.getRotation().clone();
+
                 Vector3d cratePosition = new Vector3d(targetBlock.x, targetBlock.y, targetBlock.z);
 
                 AirshipFactory.spawnMount(store, cratePosition, baseRot, 0.1f);
