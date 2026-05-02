@@ -1,4 +1,4 @@
-package net.wanmine.Modjam;
+package net.wanmine.SkyAdventures;
 
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -8,20 +8,20 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Int
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import net.wanmine.Modjam.commands.AirshipsCommandCollection;
-import net.wanmine.Modjam.entities.components.*;
-import net.wanmine.Modjam.entities.components.attachments.FlyingSeatComponent;
-import net.wanmine.Modjam.entities.components.VorthraxDayNightComponent;
-import net.wanmine.Modjam.entities.systems.FlyMountInteractionsSystems;
-import net.wanmine.Modjam.entities.systems.FlyMountMovementSystem;
-import net.wanmine.Modjam.entities.systems.FlyMountSystems;
-import net.wanmine.Modjam.entities.systems.VorthraxDayNightSystem;
+import net.wanmine.SkyAdventures.commands.AirshipsCommandCollection;
+import net.wanmine.SkyAdventures.entities.components.*;
+import net.wanmine.SkyAdventures.entities.components.attachments.FlyingSeatComponent;
+import net.wanmine.SkyAdventures.entities.components.VorthraxDayNightComponent;
+import net.wanmine.SkyAdventures.entities.systems.FlyMountInteractionsSystems;
+import net.wanmine.SkyAdventures.entities.systems.FlyMountMovementSystem;
+import net.wanmine.SkyAdventures.entities.systems.FlyMountSystems;
+import net.wanmine.SkyAdventures.entities.systems.VorthraxDayNightSystem;
 
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import net.wanmine.Modjam.entities.managers.BossBarManager;
-import net.wanmine.Modjam.entities.systems.PlayerRangeTickSystem;
-import net.wanmine.Modjam.entities.systems.VorthraxDamageSystem;
-import net.wanmine.Modjam.entities.systems.VorthraxTrackerSystem;
+import net.wanmine.SkyAdventures.entities.managers.BossBarManager;
+import net.wanmine.SkyAdventures.entities.systems.PlayerRangeTickSystem;
+import net.wanmine.SkyAdventures.entities.systems.VorthraxDamageSystem;
+import net.wanmine.SkyAdventures.entities.systems.VorthraxTrackerSystem;
 
 import javax.annotation.Nonnull;
 

@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.utils;
+package net.wanmine.SkyAdventures.utils;
 
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;

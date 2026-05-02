@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.entities.systems;
+package net.wanmine.SkyAdventures.entities.systems;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -35,9 +35,9 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
-import net.wanmine.Modjam.entities.components.FlyingDriverComponent;
-import net.wanmine.Modjam.entities.components.FlyingEntityComponent;
-import net.wanmine.Modjam.utils.AirshipFactory;
+import net.wanmine.SkyAdventures.entities.components.FlyingDriverComponent;
+import net.wanmine.SkyAdventures.entities.components.FlyingEntityComponent;
+import net.wanmine.SkyAdventures.utils.AirshipFactory;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 

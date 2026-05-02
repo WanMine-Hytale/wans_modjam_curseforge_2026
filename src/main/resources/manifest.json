@@ -1,7 +1,7 @@
 {
     "Group": "WanMine",
     "Name": "SkyAdventures",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "Description": "Wan's Sky Adventures",
     "Authors": [
         {
@@ -29,5 +29,5 @@
         "Hytale:Mounts": "*"
     },
     "ServerVersion": "2026.03.26-89796e57b",
-    "Main": "net.wanmine.Modjam.SkyAdventuresPlugin"
+    "Main": "net.wanmine.SkyAdventures.SkyAdventuresPlugin"
 }

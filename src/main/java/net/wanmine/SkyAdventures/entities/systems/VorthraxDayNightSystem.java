@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.entities.systems;
+package net.wanmine.SkyAdventures.entities.systems;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -10,8 +10,8 @@ import com.hypixel.hytale.server.core.asset.type.model.config.Model;
 import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import net.wanmine.Modjam.entities.components.VorthraxDayNightComponent;
-import net.wanmine.Modjam.utils.TimeUtil;
+import net.wanmine.SkyAdventures.entities.components.VorthraxDayNightComponent;
+import net.wanmine.SkyAdventures.utils.TimeUtil;
 
 import com.hypixel.hytale.logger.HytaleLogger;
 import javax.annotation.Nonnull;

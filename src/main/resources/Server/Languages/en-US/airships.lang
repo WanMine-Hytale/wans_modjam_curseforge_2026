@@ -1,3 +1,3 @@
 item.name = Airship Crate
-item.description = A compact airship crate. Opens into a fully deployable vessel—no assembly required.
+item.description = A compact airship crate. Instantly unfolds into a fully operational vessel—no assembly required. Press CTRL + F to collapse the airship back into its crate.
 block.interact = Press [{key}] to Open

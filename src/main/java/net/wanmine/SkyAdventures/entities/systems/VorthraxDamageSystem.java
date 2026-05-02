@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.entities.systems;
+package net.wanmine.SkyAdventures.entities.systems;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -13,7 +13,7 @@ import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import net.wanmine.Modjam.entities.managers.BossBarManager;
+import net.wanmine.SkyAdventures.entities.managers.BossBarManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.entities.components;
+package net.wanmine.SkyAdventures.entities.components;
 
 public enum AttachmentType {
     WEAPON,

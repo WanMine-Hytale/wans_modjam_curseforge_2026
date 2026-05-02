@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.entities.systems;
+package net.wanmine.SkyAdventures.entities.systems;
 
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.component.dependency.Dependency;
@@ -29,11 +29,11 @@ import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.PositionUtil;
-import net.wanmine.Modjam.entities.components.FlyingDriverComponent;
-import net.wanmine.Modjam.entities.components.FlyingEntityComponent;
-import net.wanmine.Modjam.entities.components.attachments.FlyingSeatComponent;
+import net.wanmine.SkyAdventures.entities.components.FlyingDriverComponent;
+import net.wanmine.SkyAdventures.entities.components.FlyingEntityComponent;
+import net.wanmine.SkyAdventures.entities.components.attachments.FlyingSeatComponent;
 import com.hypixel.hytale.component.system.RefSystem;
-import net.wanmine.Modjam.ui.AirshipControlsHUD;
+import net.wanmine.SkyAdventures.ui.AirshipControlsHUD;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.entities.components;
+package net.wanmine.SkyAdventures.entities.components;
 
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;

@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.entities.systems;
+package net.wanmine.SkyAdventures.entities.systems;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -9,7 +9,7 @@ import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import net.wanmine.Modjam.entities.managers.BossBarManager;
+import net.wanmine.SkyAdventures.entities.managers.BossBarManager;
 
 import javax.annotation.Nonnull;
 

@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.entities.components;
+package net.wanmine.SkyAdventures.entities.components;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
@@ -9,7 +9,7 @@ import com.hypixel.hytale.protocol.MountController;
 import com.hypixel.hytale.protocol.MovementStates;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import net.wanmine.Modjam.SkyAdventuresPlugin;
+import net.wanmine.SkyAdventures.SkyAdventuresPlugin;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

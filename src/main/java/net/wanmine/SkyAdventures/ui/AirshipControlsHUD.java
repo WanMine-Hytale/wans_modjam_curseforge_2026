@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.ui;
+package net.wanmine.SkyAdventures.ui;
 
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;

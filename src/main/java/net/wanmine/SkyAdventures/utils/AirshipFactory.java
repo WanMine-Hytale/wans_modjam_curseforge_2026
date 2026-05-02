@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.utils;
+package net.wanmine.SkyAdventures.utils;
 
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -17,9 +17,9 @@ import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
 import com.hypixel.hytale.server.core.modules.interaction.Interactions;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import net.wanmine.Modjam.entities.components.FlyingDriverComponent;
-import net.wanmine.Modjam.entities.components.FlyingEntityComponent;
-import net.wanmine.Modjam.entities.components.attachments.FlyingSeatComponent;
+import net.wanmine.SkyAdventures.entities.components.FlyingDriverComponent;
+import net.wanmine.SkyAdventures.entities.components.FlyingEntityComponent;
+import net.wanmine.SkyAdventures.entities.components.attachments.FlyingSeatComponent;
 
 public class AirshipFactory {
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();

@@ -1,4 +1,4 @@
-package net.wanmine.Modjam.commands;
+package net.wanmine.SkyAdventures.commands;
 
 import com.hypixel.hytale.builtin.mounts.MountedComponent;
 import com.hypixel.hytale.component.*;
@@ -12,19 +12,16 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.*;
-import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import net.wanmine.Modjam.entities.components.FlyingDriverComponent;
-import net.wanmine.Modjam.entities.components.FlyingEntityComponent;
-import net.wanmine.Modjam.utils.AirshipFactory;
+import net.wanmine.SkyAdventures.entities.components.FlyingDriverComponent;
+import net.wanmine.SkyAdventures.entities.components.FlyingEntityComponent;
+import net.wanmine.SkyAdventures.utils.AirshipFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /*
 public class AirshipsCommand extends AbstractPlayerCommand {
